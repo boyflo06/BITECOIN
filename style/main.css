@@ -7,7 +7,7 @@ body {
     padding: 0;
 }
 
-.link-button {
+a {
     background-color: #74f14e;
     border: solid 2px black;
     border-radius: 5px;
