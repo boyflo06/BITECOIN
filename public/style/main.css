@@ -30,7 +30,7 @@ p {
 }
 
 #greyed-out {
-    height: 250px;
+    height: 175px;
     width: 100%;
     background-color: #D9D9D9;
     border-radius: 0px 0px 50px 50px;
@@ -38,11 +38,12 @@ p {
     top: 0;
     left: 0;
     z-index: 0;
+    opacity: 0.5;
 }
 
 #header-text {
     position: relative;
-    margin-top: 140px;
+    margin-top: 50px;
 }
 
 #info {
