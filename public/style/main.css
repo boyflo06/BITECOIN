@@ -1,0 +1,50 @@
+body {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    background-color: #C4E5FF;
+}
+
+button {
+    background-color: #74f14e;
+    border: solid 2px black;
+    border-radius: 5px;
+    width: 15pc;
+    height: 5pc;
+}
+
+h1, p {
+    font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
+    font-style: normal;
+}
+
+h1 {
+    font-size: 32px;
+}
+
+p {
+    font-size: 20px;
+}
+
+#greyed-out {
+    height: 250px;
+    width: 100%;
+    background-color: #D9D9D9;
+    border-radius: 0px 0px 50px 50px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+#header-text {
+    position: relative;
+    margin-top: 140px;
+}
+
+#info {
+    margin-top: 100px;
+}
