@@ -16,7 +16,7 @@ button {
     height: 5pc;
 }
 
-h1, p {
+h1, p, a {
     font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
     font-style: normal;
 }
@@ -27,6 +27,11 @@ h1 {
 
 p {
     font-size: 20px;
+}
+
+a {
+    color: black;
+    text-decoration-line: none;
 }
 
 #greyed-out {
