@@ -10,7 +10,7 @@ body {
 
 button {
     background-color: #91FFB6;
-    border: solid 2px black;
+    border: solid 2px #00000040;
     border-radius: 50px;
     width: 15pc;
     height: 3pc;

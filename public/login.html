@@ -10,17 +10,20 @@
 <body>
     <header>
         <div id="greyed-out"></div>
-        <div id="header-text">
+        <a id="header-text" href="./index.html">
             <h1>BITECOIN BANKING</h1>
             <p>Made for the best, by the best</p>
-        </div>
+        </a>
     </header>
     <section id="login">
         <h1>Sign-In</h1>
+        <p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>
         <input type="email" placeholder="E-mail" id="email-input"><br>
-        <input type="password" placeholder="Password" style="margin-top: 20px;"><br>
-        <button style="margin-top: 20px;">Sign-In</button><br>
+        <input type="password" placeholder="Password" style="margin-top: 20px;" id="pswrd-input"><br>
+        <button style="margin-top: 20px;" id="signin-button">Sign-In</button><br>
         <a href="./sign-up.html">Don't have an account : Register</a>
+        <p id="signup-button"></p>
     </section>
 </body>
+<script src="./script/index.js" type="module"></script>
 </html>

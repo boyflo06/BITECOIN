@@ -8,28 +8,26 @@
     <link rel="stylesheet" href="./style/main.css">
 </head>
 <body>
-    <body>
-        <header>
-            <div id="greyed-out"></div>
-            <div id="header-text">
-                <h1>BITECOIN BANKING</h1>
-                <p>Made for the best, by the best</p>
-            </div>
-        </header>
-        <section id="login">
-            <h1>Register</h1>
-            <input type="text" placeholder="Name" id="name-input"><br>
-            <input type="email" placeholder="E-mail" id="email-input" style="margin-top: 20px;"><br>
-            <p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>
-            <input type="password" placeholder="Password" id="pswrd-input" style="margin-top: 10px;"><br>
-            <p style="font-size: 12px; color: red;margin-top: 0;" id="pswrd-error"></p>
-            <input type="password" placeholder="Confirm Password" style="margin-top: 10px;" id="pswrd-confirm-input"><br>
-            <p style="font-size: 12px; color: red;margin-top: 0;" id="value-error"></p>
-            <button style="margin-top: 20px;" id="signup-button">Sign-Up</button><br>
-            <a href="./login.html">Already have an account : Sign-In</a>
-        </section>
-    </body>
-    <script src="/src/index.js" type="module"></script>
-    </html>
+    <header>
+        <div id="greyed-out"></div>
+        <a id="header-text" href="./index.html">
+            <h1>BITECOIN BANKING</h1>
+            <p>Made for the best, by the best</p>
+        </a>
+    </header>
+    <section id="login">
+        <h1>Register</h1>
+        <input type="text" placeholder="Name" id="name-input"><br>
+        <input type="email" placeholder="E-mail" id="email-input" style="margin-top: 20px;"><br>
+        <p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>
+        <input type="password" placeholder="Password" id="pswrd-input" style="margin-top: 10px;"><br>
+        <p style="font-size: 12px; color: red;margin-top: 0;" id="pswrd-error"></p>
+        <input type="password" placeholder="Confirm Password" style="margin-top: 10px;" id="pswrd-confirm-input"><br>
+        <p style="font-size: 12px; color: red;margin-top: 0;" id="value-error"></p>
+        <button style="margin-top: 20px;" id="signup-button">Sign-Up</button><br>
+        <a href="./login.html">Already have an account : Sign-In</a>
+        <p id="signin-button"></p>
+    </section>
 </body>
+<script src="./script/index.js" type="module"></script>
 </html>
