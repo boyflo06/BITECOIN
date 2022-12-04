@@ -62,10 +62,25 @@ if (document.querySelector("title").innerHTML == "User") {
         } else if (userrole == "administrateur supreme") {
           revenue.innerHTML = "4750 ß/week"
         }
-        document.getElementById("logout").addEventListener("click", signout)
       })
+      document.getElementById("logout").addEventListener("click", signout)
     } else {
-      window.location.href = "./login.html"
+      window.location.href = "./index.html"
+    }
+  })
+}
+if (document.querySelector("title").innerHTML == "Transferer") {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      console.log(uid)
+      get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+        document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+      })
+      document.getElementById("transfer-button").addEventListener("click", transfer)
+    } else {
+      window.location.href = "./index.html"
     }
   })
 }
@@ -170,6 +185,21 @@ function login () {
 function signout() {
   signOut(auth)
   setTimeout(() => {window.location.href = "./index.html";}, 500)
+}
+
+async function transfer() {
+  var amount = document.getElementById("amount-input").value
+  var id = document.getElementById("id-input").value
+
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+  var bank = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+    return snapshot.val().bank
+  })
+  if (bank < amount) {
+    document.getElementById("amount-error").innerHTML = "You do not have enough on your account!"
+  }
 }
 
 //Validation functions
