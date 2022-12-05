@@ -72,3 +72,9 @@ a {
 #login {
     margin-top: 50px;
 }
+
+.transaction-data{
+    border: solid 2px #00000040;
+    border-radius: 50px;
+    margin-bottom: 10px;
+}

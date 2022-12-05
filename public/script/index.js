@@ -84,8 +84,20 @@ if (document.querySelector("title").innerHTML == "Transferer") {
     }
   })
 }
+if (document.querySelector("title").innerHTML == "Historique"){
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      console.log(uid)
+      userlogs()
+    } else {
+      window.location.href = "./index.html"
+    }
+  })
+}
 
-function register () {
+async function register () {
   // Get all our input fields
   var name = document.getElementById("name-input").value
   var email = document.getElementById('email-input').value
@@ -115,14 +127,14 @@ function register () {
  
   // Move on with Auth
   createUserWithEmailAndPassword(auth, email, password)
-  .then(function() {
+  .then(async function() {
     // Declare user variable
     var user = auth.currentUser
     var uid = user.uid
     var db = getDatabase()
 
     // Add this user to Firebase Database
-    set(ref(db, 'users/' + uid), {
+    await set(ref(db, 'users/' + uid), {
       email : email,
       name : name,
       bank : 0,
@@ -133,7 +145,7 @@ function register () {
     });
 
     // DOne
-    setTimeout(() => {window.location.href = "./user.html";}, 5000)
+    window.location.href = "./user.html"
   })
   .catch(function(error) {
     // Firebase will use this to alert of its errors
@@ -159,17 +171,17 @@ function login () {
   }
 
   signInWithEmailAndPassword(auth, email, password)
-  .then(function() {
+  .then(async function() {
     // Declare user variable
     var user = auth.currentUser
     var uid = user.uid
     var db = getDatabase()
     
-    set(ref(db, "users/" + uid + "/last_login"), Date.now())
+    await set(ref(db, "users/" + uid + "/last_login"), Date.now())
 
     // DOne
     console.log('gud')
-    setTimeout(() => {window.location.href = "./user.html";}, 5000)
+    window.location.href = "./user.html"
 
 
   })
@@ -188,19 +200,89 @@ function signout() {
 }
 
 async function transfer() {
+  //Get value of inputs
   var amount = document.getElementById("amount-input").value
   var id = document.getElementById("id-input").value
 
+  //Get database and usefull stuff
   var db = getDatabase()
   var user = auth.currentUser
   var uid = user.uid
+
+  //get value of banks and test them
   var bank = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
     return snapshot.val().bank
   })
   if (bank < amount) {
     document.getElementById("amount-error").innerHTML = "You do not have enough on your account!"
+    return
   }
+  var tbank = await get(child(ref(db), "users/" + id))
+    .then((snapshot)=>{
+      return snapshot.val().bank
+    })
+    .catch(function(error) {
+      document.getElementById("id-error").innerHTML = "This id isn't linked to an account"
+      console.log("error code : " + error.message)
+      return -1
+    })
+  if (tbank != -1) {
+    document.getElementById("id-error").innerHTML = ""
+  } else {
+    return
+  }
+
+  //Transfer amount
+  await set(ref(db, "users/" + uid + "/bank"), bank-amount)
+  await set(ref(db, "users/" + id + "/bank"), Number(tbank)+Number(amount))
+
+  //Log transfer to database
+  var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+    return snapshot.val().name
+  })
+  var tname = await get(child(ref(db), "users/" + id)).then((snapshot)=>{
+    return snapshot.val().name
+  })
+  await set(ref(db, "transactions/" + Date.now()), {
+    name : name,
+    target : tname,
+    amount : amount
+  })
+
+  //Done
+  document.getElementById("result").innerHTML = "Transfère réussit!"
 }
+
+async function userlogs() {
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+
+  var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+    return snapshot.val().name
+  })
+
+  get(child(ref(db),"transactions"))
+    .then((snapshot)=>{
+      snapshot.forEach((dataSnapshot)=>{
+        console.log(dataSnapshot.val())
+        var date = new Date(Number(dataSnapshot.key))
+        var month = Number(date.getMonth()) + Number(1)
+        if (dataSnapshot.val().name == name) {
+          console.log("Transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + " at " + dataSnapshot.key)
+          document.getElementById("under-me").insertAdjacentHTML("afterend", 
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+          )
+        } else if (dataSnapshot.val().target == name) {
+          console.log("Recieved " + dataSnapshot.val().amount + " ß from " + dataSnapshot.val().name + " at " + dataSnapshot.key)
+          document.getElementById("under-me").insertAdjacentHTML("afterend", 
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Recieved " + dataSnapshot.val().amount + " ß from " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+          )
+        }
+      })
+    })
+}
+
 
 //Validation functions
 function validate_email(email) {
