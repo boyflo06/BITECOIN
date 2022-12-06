@@ -64,7 +64,7 @@ if (document.querySelector("title").innerHTML == "User") {
         }
         if (snapshot.val().admin == true) {
           document.getElementById("logout").insertAdjacentHTML("beforebegin", 
-            "<div style='margin-bottom: 5px'><a href='./userlogs.html'><button><p style='margin: 0;'>Logs Admins</p></button></a></div><br>"
+            "<div style='margin-bottom: 5px'><a href='./admin.html'><button><p style='margin: 0;'>Admin Pannel</p></button></a></div><br>"
           )
         }
       })
@@ -96,6 +96,37 @@ if (document.querySelector("title").innerHTML == "Historique"){
       db = getDatabase()
       console.log(uid)
       userlogs()
+    } else {
+      window.location.href = "./index.html"
+    }
+  })
+}
+if (document.querySelector("title").innerHTML == "Admin Pannel") {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      console.log(uid)
+      get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+        if (snapshot.val().admin == true) {
+          document.getElementById("historique-title").addEventListener("click", toggledisplay)
+          adminlogs()
+        } else {
+          window.location.href = "./user.html"
+        }
+      })
+    } else {
+      window.location.href = "./index.html"
+    }
+  })
+}
+if (document.querySelector("title").innerHTML == "Demander"){
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      console.log(uid)
+      document.getElementById("lend-button").addEventListener("click", lend)
     } else {
       window.location.href = "./index.html"
     }
@@ -145,7 +176,7 @@ async function register () {
       bank : 0,
       role : "sans-emploie",
       verified : false,
-      lend : 0,
+      lend : "",
       admin : false,
       last_login : Date.now()
     });
@@ -274,13 +305,19 @@ async function userlogs() {
         console.log(dataSnapshot.val())
         var date = new Date(Number(dataSnapshot.key))
         var month = Number(date.getMonth()) + Number(1)
-        if (dataSnapshot.val().name == name) {
-          console.log("Transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + " at " + dataSnapshot.key)
+        if (dataSnapshot.val().name == "bank") {
+          document.getElementById("under-me").insertAdjacentHTML("afterend", 
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+          )
+        } else if (dataSnapshot.val().target == "bank") {
+          document.getElementById("under-me").insertAdjacentHTML("afterend", 
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+          )
+        } else if (dataSnapshot.val().name == name) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else if (dataSnapshot.val().target == name) {
-          console.log("Recieved " + dataSnapshot.val().amount + " ß from " + dataSnapshot.val().name + " at " + dataSnapshot.key)
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Recieved " + dataSnapshot.val().amount + " ß from " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
@@ -289,6 +326,73 @@ async function userlogs() {
     })
 }
 
+async function adminlogs() {
+  var db = getDatabase()
+  get(child(ref(db), "transactions"))
+    .then((snapshot)=>{
+      snapshot.forEach((dataSnapshot)=>{
+        var date = new Date(Number(dataSnapshot.key))
+        var month = Number(date.getMonth()) + Number(1)
+        if (dataSnapshot.val().name == "bank") {
+          document.getElementById("under-me").insertAdjacentHTML("afterend", 
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().target + " lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+          )
+        } else if (dataSnapshot.val().target == "bank") {
+          document.getElementById("under-me").insertAdjacentHTML("afterend", 
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+          )
+        } else {
+          document.getElementById("under-me").insertAdjacentHTML("afterend", 
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+          )
+        }
+      })
+    })
+}
+
+function toggledisplay() {
+  (function(style) {
+    style.display = style.display === 'none' ? '' : 'none';
+  })(document.getElementById("historique").style);
+}
+
+async function lend() {
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+
+  var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+    return snapshot.val().name
+  })
+  var bank = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+    return snapshot.val().bank
+  })
+  var amount = Number(document.getElementById("amount-input").value)
+  var weeks = Number(document.getElementById("time-input").value)
+
+  var i = weeks/2
+  var payments = Math.round(amount * (1 + (i/100))/weeks)
+  console.log(amount, weeks, i, payments)
+  if ((weeks - Math.floor(weeks)) != 0 || weeks == 0) {
+    document.getElementById("time-error").innerHTML = "Please enter a valid number of weeks"
+    return
+  } else {
+    document.getElementById("time-error").innerHTML = ""
+  }
+  set(ref(db, "users/" + uid + "/lend/" + Date.now()), {
+    amount : amount,
+    payments : payments,
+    weeks_left : weeks,
+    intrest : i
+  })
+  set(ref(db, "users/" + uid + "/bank"), Number(bank) + amount)
+  set(ref(db, "transactions/" + Date.now()), {
+    name : "bank",
+    target : name,
+    amount : amount
+  })
+  document.getElementById("result").innerHTML = "lended succesfully"
+}
 
 //Validation functions
 function validate_email(email) {
@@ -324,3 +428,4 @@ function validate_field(field) {
     return true
   }
 }
+
