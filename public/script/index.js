@@ -62,6 +62,11 @@ if (document.querySelector("title").innerHTML == "User") {
         } else if (userrole == "administrateur supreme") {
           revenue.innerHTML = "4750 ß/week"
         }
+        if (snapshot.val().admin == true) {
+          document.getElementById("logout").insertAdjacentHTML("beforebegin", 
+            "<div style='margin-bottom: 5px'><a href='./userlogs.html'><button><p style='margin: 0;'>Logs Admins</p></button></a></div><br>"
+          )
+        }
       })
       document.getElementById("logout").addEventListener("click", signout)
     } else {
@@ -141,6 +146,7 @@ async function register () {
       role : "sans-emploie",
       verified : false,
       lend : 0,
+      admin : false,
       last_login : Date.now()
     });
 
