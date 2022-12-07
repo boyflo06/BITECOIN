@@ -55,7 +55,7 @@ if (document.querySelector("title").innerHTML == "User") {
           revenue.innerHTML = "2000 ß/week"
         } else if (userrole == "ministre" || userrole == "magistrat" || userrole == "premier ministre") {
           revenue.innerHTML = "2500 ß/week"
-        } else if (userrole == "minsitre des finances") {
+        } else if (userrole == "ministre des finances") {
           revenue.innerHTML = "3000 ß/week"
         } else if (userrole == "administrateur delegay") {
           revenue.innerHTML = "3500 ß/week"
@@ -83,6 +83,16 @@ if (document.querySelector("title").innerHTML == "Transferer") {
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
         document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
       })
+      get(child(ref(db), "users/"))
+        .then((snapshot)=>{
+          snapshot.forEach((dataSnapshot)=>{
+            if (dataSnapshot.key != uid) {
+              document.getElementById("under-me").insertAdjacentHTML("afterend", 
+                "<option value='" + dataSnapshot.key + "' id='under-me'>" + dataSnapshot.val().name + " (id : " + dataSnapshot.key + ")" + "</option>"
+              )
+            }
+          })
+        })
       document.getElementById("transfer-button").addEventListener("click", transfer)
     } else {
       window.location.href = "./index.html"
@@ -239,7 +249,7 @@ function signout() {
 async function transfer() {
   //Get value of inputs
   var amount = document.getElementById("amount-input").value
-  var id = document.getElementById("id-input").value
+  var id = document.getElementById("id-select").value
 
   //Get database and usefull stuff
   var db = getDatabase()

@@ -16,7 +16,7 @@ button {
     height: 3pc;
 }
 
-input {
+input, select {
     background-color: #D9D9D9;
     width: 15pc;
     height: 3pc;

@@ -20,11 +20,9 @@
         <p id="bank" style="margin-bottom: 0;"></p>
         <input placeholder="amount" style="margin-top: 20px;" id="amount-input"><br>
         <p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>
-        <input list="ids" id="id-input" name="id-input">
-        <datalist id="ids">
-            <option value="none">-- Please Choose an Option --</option>
-            <option value="useruid">test</option>
-        </datalist>
+        <select id="id-select" style="margin-top: 15px; width: 16.5pc;">
+            <option value="none" id="under-me">-- Please choose an option --</option>
+        </select>
         <p style="margin: 0; font-size: 14px; color:red;" id="id-error"></p>
         <button style="margin-top: 20px;" id="transfer-button"><p style="margin: 0px;">Envoyer</p></button><br>
         <p style="color: green;" id="result"></p>
