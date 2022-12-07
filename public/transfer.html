@@ -20,8 +20,11 @@
         <p id="bank" style="margin-bottom: 0;"></p>
         <input placeholder="amount" style="margin-top: 20px;" id="amount-input"><br>
         <p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>
-        <input placeholder="id" style="margin-top: 20px;" id="id-input"><br>
-        <p style="margin: 0; font-size: 14px; color:red;">!!Mettre le mauvais id fera perdre l'argent. Relisez vous!!</p>
+        <input list="ids" id="id-input" name="id-input">
+        <datalist id="ids">
+            <option value="none">-- Please Choose an Option --</option>
+            <option value="useruid">test</option>
+        </datalist>
         <p style="margin: 0; font-size: 14px; color:red;" id="id-error"></p>
         <button style="margin-top: 20px;" id="transfer-button"><p style="margin: 0px;">Envoyer</p></button><br>
         <p style="color: green;" id="result"></p>
