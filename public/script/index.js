@@ -20,13 +20,21 @@ const firebaseConfig = {
   measurementId: "G-GJWGN4SDZZ"
 };
 
-// Covering all browsers that support this
-var docEl = document.documentElement;
-var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+/* Get the documentElement (<html>) to display the page in fullscreen */
+var elem = document.documentElement;
 
-// Execute the variable on initalization
-requestFullScreen.call(docEl);
+/* View in fullscreen */
+function openFullscreen() {
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) { /* Safari */
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) { /* IE11 */
+    elem.msRequestFullscreen();
+  }
+}
+
+openFullscreen();
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
