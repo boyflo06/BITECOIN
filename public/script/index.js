@@ -20,6 +20,14 @@ const firebaseConfig = {
   measurementId: "G-GJWGN4SDZZ"
 };
 
+// Covering all browsers that support this
+var docEl = document.documentElement;
+var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+// Execute the variable on initalization
+requestFullScreen.call(docEl);
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
