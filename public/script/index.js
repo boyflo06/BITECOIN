@@ -26,11 +26,25 @@ const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
 
+if (document.querySelector("title").innerHTML == "Home") {
+  document.getElementById("register-button").addEventListener("click", function() {
+    window.location.replace("./sign-up.html")
+  })
+  document.getElementById("login-button").addEventListener("click", function() {
+    window.location.replace("./login.html")
+  })
+}
 if (document.querySelector("title").innerHTML == "Sign-Up") {
   document.getElementById("signup-button").addEventListener("click", register)
+  document.getElementById("login-button").addEventListener("click", function() {
+    window.location.replace("./login.html")
+  })
 }
 if (document.querySelector("title").innerHTML == "Log-In") {
   document.getElementById("signin-button").addEventListener("click", login)
+  document.getElementById("register-button").addEventListener("click", function() {
+    window.location.replace("./sign-up.html")
+  })
 }
 if (document.querySelector("title").innerHTML == "User") {
   onAuthStateChanged(auth, (user) => {
@@ -228,7 +242,7 @@ function login () {
 
     // DOne
     console.log('gud')
-    window.location.href = "./user.html"
+    window.location.replace("./user.html")
 
 
   })
