@@ -1,10 +1,15 @@
 {
-    "name" : "bitecoin",
-    "type" : "module",
-    "version" : "1.0.0-alpha.1",
-    "liscence" : "MIT",
-    "main": "main.js",
-    "dependencies": {
-        "firebase": "9.14.0"
-    }
+    "short_name": "Bitecoin",
+    "name" : "Bitecoin Banking App",
+    "icons" : [
+        {
+            "src": "/public/style/529238D8-2393-463A-A6B3-C8D16B51DD68.jpeg",
+            "type": "image/gif",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": "/public/index",
+    "background_color": "#C4E5FF",
+    "display": "standalone",
+    "theme_color": "#C4E5FF"
 }
