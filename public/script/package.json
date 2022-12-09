@@ -12,5 +12,11 @@
     "background_color": "#C4E5FF",
     "display": "standalone",
     "theme_color": "#C4E5FF",
-    "scope": "/public/"
+    "scope": "/public/",
+    "shortcuts": [
+        {
+            "name": "login"
+            "url": "/public/login"
+        }
+    ]
 }
