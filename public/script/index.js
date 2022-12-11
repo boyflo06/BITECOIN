@@ -34,11 +34,11 @@ function indexPage() {
   }
   document.querySelector("header").insertAdjacentHTML("afterend", 
     "<section id='info'>"
-        + "<p>The ONLY banking app approved by the FDO</p>"
-        + "<p>User friendly and easy to use</p>"
-        + "<p>Join <span style='font-weight: bolder;'>today</span> for free</p>"
-        + "<a id='register-button'><button><p style='margin: 0;'>Register</p></button></a><br>"
-        + "<a id='login-button'>Already have an account? Sign-In</a>"
+        + "<p>La SEULE application bancaire approuvée par la FDO</p>"
+        + "<p>Intuitif et utilisation simple</p>"
+        + "<p>Rejoignez <span style='font-weight: bolder;'>aujourd'hui</span> gratuitement!</p>"
+        + "<a id='register-button'><button><p style='margin: 0;'>Créer un compte</p></button></a><br>"
+        + "<a id='login-button'>Vous avez deja un compte ? Connectez-vous</a>"
     + "</section>"
   )
   document.getElementById("register-button").addEventListener("click", signupPage
@@ -52,16 +52,16 @@ function signupPage () {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
     '<section id="login">'
-      +'<h1>Register</h1>'
-      +'<input type="text" placeholder="Name" id="name-input"><br>'
+      +'<h1>S'+"'"+'enregistrer</h1>'
+      +'<input type="text" placeholder="Nom" id="name-input"><br>'
       +'<input type="email" placeholder="E-mail" id="email-input" style="margin-top: 20px;"><br>'
       +'<p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>'
-      +'<input type="password" placeholder="Password" id="pswrd-input" style="margin-top: 10px;"><br>'
+      +'<input type="password" placeholder="Mot de Passe" id="pswrd-input" style="margin-top: 10px;"><br>'
       +'<p style="font-size: 12px; color: red;margin-top: 0;" id="pswrd-error"></p>'
-      +'<input type="password" placeholder="Confirm Password" style="margin-top: 10px;" id="pswrd-confirm-input"><br>'
+      +'<input type="password" placeholder="Confirmez le mot de passe" style="margin-top: 10px;" id="pswrd-confirm-input"><br>'
       +'<p style="font-size: 12px; color: red;margin-top: 0;" id="value-error"></p>'
-      +'<button style="margin-top: 20px;" id="signup-button">Sign-Up</button><br>'
-      +'<a id="login-button">Already have an account : Sign-In</a>'
+      +'<button style="margin-top: 20px;" id="signup-button">S'+"'"+'enregistrer</button><br>'
+      +'<a id="login-button">Vous avez deja un compte ? Connectez-vous</a>'
     +'</section>'
   )
   document.getElementById("signup-button").addEventListener("click", register)
@@ -72,12 +72,12 @@ function loginPage() {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
     '<section id="login">'
-    +'<h1>Sign-In</h1>'
+    +'<h1>Se connecter</h1>'
     +'<p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>'
     +'<input type="email" placeholder="E-mail" id="email-input"><br>'
-    +'<input type="password" placeholder="Password" style="margin-top: 20px;" id="pswrd-input"><br>'
-    +'<button style="margin-top: 20px;" id="signin-button">Sign-In</button><br>'
-    +"<a id='register-button'>Don't have an account : Register</a>"
+    +'<input type="password" placeholder="Mot de passe" style="margin-top: 20px;" id="pswrd-input"><br>'
+    +'<button style="margin-top: 20px;" id="signin-button">Se connecter</button><br>'
+    +"<a id='register-button'>Vous n'avez toujours pad compte ? Creer un compte</a>"
     +'</section>'
   )
   document.getElementById("signin-button").addEventListener("click", login)
@@ -93,7 +93,7 @@ function userPage() {
       +'<h1 id="bank" style="margin-bottom: 0;"></h1>'
       +'<p id="revenue" style="margin-top: 0;"></p>'
       +'<div style="margin-bottom: 5px;"><a id="transfer-button"><button><p style="margin: 0;">Transferer</p></button></a></div><br>'
-      +'<div style="margin-bottom: 5px"><a id="lend-button"><button><p style="margin: 0;">Demander</p></button></a></div><br>'
+      +'<div style="margin-bottom: 5px"><a id="lend-button"><button><p style="margin: 0;">Empreinter</p></button></a></div><br>'
       +'<div style="margin-bottom: 5px"><a id="userlogs-button"><button><p style="margin: 0;">Historique</p></button></a></div><br>'
       +'<a id="logout">Log-Out</a>'
     +'</section>'
@@ -150,10 +150,10 @@ function transferPage() {
     '<section id="info">'
       +'<h1>Transférer</h1>'
       +'<p id="bank" style="margin-bottom: 0;"></p>'
-      +'<input placeholder="amount" style="margin-top: 20px;" id="amount-input"><br>'
+      +'<input placeholder="quantitée" style="margin-top: 20px;" id="amount-input"><br>'
       +'<p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>'
       +'<select id="id-select" style="margin-top: 15px; width: 16.5pc;">'
-        +'<option value="none" id="under-me">-- Please choose an option --</option>'
+        +'<option value="none" id="under-me">-- Choississez un destinataire --</option>'
       +'</select>'
       +'<p style="margin: 0; font-size: 14px; color:red;" id="id-error"></p>'
       +'<button style="margin-top: 20px;" id="transfer-button"><p style="margin: 0px;">Envoyer</p></button><br>'
@@ -217,7 +217,7 @@ function adminPage() {
       +'<div id="historique" style="display: none;">'
           +'<p id="under-me"></p>'
       +'</div>'
-      +'<button id="weekly-update"><h2 style="margin: 0;">Weekly Update</h2></button>'
+      +'<button id="weekly-update"><h2 style="margin: 0;">Mise a jour hebdomadaire</h2></button>'
     +'</section>'
   )
   onAuthStateChanged(auth, (user) => {
@@ -244,14 +244,14 @@ function lendPage() {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
     '<section id="info">'
-      +'<h1>Demander</h1>'
+      +'<h1>Empreinter</h1>'
       +'<p id="bank" style="margin-bottom: 0;"></p>'
-      +'<input placeholder="amount" style="margin-top: 20px;" id="amount-input"><br>'
+      +'<input placeholder="quantité" style="margin-top: 20px;" id="amount-input"><br>'
       +'<p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>'
-      +'<input placeholder="time" style="margin-top: 20px;" id="time-input"><br>'
+      +'<input placeholder="durée" style="margin-top: 20px;" id="time-input"><br>'
       +'<p style="margin: 0; font-size: 14px; color:red;" id="time-error"></p>'
       +'<p style="margin: 0; font-size: 14px;">Le temps mis fait varier le nombre de fois le remboursement est divisé<br>et determine la valeur de l' + "'" + 'interet dans la logique que 1 semaine = +0,5%.</p>'
-      +'<p style="font-size: 14px;">Donc si vous metez amount = 100000 et time = 20,<br>vous devrez rembourser 110000 ß divisé en payements de 5500 ß</p>'
+      +'<p style="font-size: 14px;">Donc si vous metez quantité = 100000 et durée = 20,<br>vous devrez rembourser 110000 ß divisé en payements de 5500 ß</p>'
       +'<p style="font-size: 14px;">Si vous ne savez pas repayer la banque, votre solde sera negatif</p>'
       +'<button style="margin-top: 20px;" id="lend-button"><p style="margin: 0px;">Envoyer</p></button><br>'
       +'<p style="color: green;" id="result"></p>'
@@ -280,20 +280,20 @@ async function register () {
 
   // Validate input fields
   if (validate_email(email) == false) {
-    document.getElementById("email-error").innerHTML = 'Email is Outta Line!!'
+    document.getElementById("email-error").innerHTML = 'Mettez un E-mail valide SVP'
     return
     // Don't continue running the code
   } else {
     document.getElementById("email-error").innerHTML = ''
   }
   if (validate_password(password, password2) == false) {
-    document.getElementById("pswrd-error").innerHTML = "Password is too short or doesnt match"
+    document.getElementById("pswrd-error").innerHTML = "Les mots de passes sont trop court (<6 lettres) ou ne sont pas les memes"
     return
   } else {
     document.getElementById("pswrd-error").innerHTML = ''
   }
   if (validate_field(name) == false || validate_field(email) == false || validate_field(password) == false || validate_field(password2) == false) {
-    document.getElementById("value-error").innerHTML = 'One or More Extra Fields is Outta Line!!'
+    document.getElementById("value-error").innerHTML = 'Un ou plusieurs des champs ne sont pas correctes'
     return
   } else {
     document.getElementById("value-error").innerHTML = ''
@@ -327,7 +327,7 @@ async function register () {
     var error_code = error.code
     var error_message = error.message
     if (error_message == "Firebase: Error (auth/email-already-in-use).") {
-      document.getElementById("email-error").innerHTML = "Email is already linked to an account!"
+      document.getElementById("email-error").innerHTML = "Cette adresse émail est déja lié a un compte"
     }
     console.log(error_message)
   })
@@ -340,7 +340,7 @@ function login () {
 
   // Validate input fields
   if (validate_email(email) == false) {
-    document.getElementById("email-error").innerHTML = 'Email or Password is Outta Line!!'
+    document.getElementById("email-error").innerHTML = "Mettez un E-mail valide SVP"
     return
     // Don't continue running the code
   }
@@ -365,7 +365,9 @@ function login () {
     var error_code = error.code
     var error_message = error.message
 
-    alert(error_message)
+    if (error_message == "Firebase: Error (auth/wrong-password)." ) {
+      document.getElementById("email-error").innerHTML = "Mauvais mot de passe ou adresse email"
+    }
   })
 }
 
@@ -389,7 +391,7 @@ async function transfer() {
     return snapshot.val().bank
   })
   if (bank < amount) {
-    document.getElementById("amount-error").innerHTML = "You do not have enough on your account!"
+    document.getElementById("amount-error").innerHTML = "Votre solde est insufisant"
     return
   }
   var tbank = await get(child(ref(db), "users/" + id))
@@ -397,7 +399,7 @@ async function transfer() {
       return snapshot.val().bank
     })
     .catch(function(error) {
-      document.getElementById("id-error").innerHTML = "This id isn't linked to an account"
+      document.getElementById("id-error").innerHTML = "Cet identifiant n'est pas lié a un compte"
       console.log("error code : " + error.message)
       return -1
     })
@@ -445,19 +447,19 @@ async function userlogs() {
         var month = Number(date.getMonth()) + Number(1)
         if (dataSnapshot.val().name == "bank") {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Empreint de " + dataSnapshot.val().amount + " ß a la " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> Le " + date.getDate() + "-" + month + "-" + date.getFullYear() + " a " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else if (dataSnapshot.val().target == "bank") {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Remboursement de " + dataSnapshot.val().amount + " ß a la " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> Le " + date.getDate() + "-" + month + "-" + date.getFullYear() + " a " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else if (dataSnapshot.val().name == name) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Transfère de " + dataSnapshot.val().amount + " ß a " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> Le " + date.getDate() + "-" + month + "-" + date.getFullYear() + " a " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else if (dataSnapshot.val().target == name) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Recieved " + dataSnapshot.val().amount + " ß from " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Reception de " + dataSnapshot.val().amount + " ß de " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> Le " + date.getDate() + "-" + month + "-" + date.getFullYear() + " a " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         }
       })
@@ -473,15 +475,15 @@ async function adminlogs() {
         var month = Number(date.getMonth()) + Number(1)
         if (dataSnapshot.val().name == "bank") {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().target + " lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().target + " a empreinté " + dataSnapshot.val().amount + " ß a la " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> Le " + date.getDate() + "-" + month + "-" + date.getFullYear() + " a " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else if (dataSnapshot.val().target == "bank") {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " a remboursé " + dataSnapshot.val().amount + " ß a la " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> Le " + date.getDate() + "-" + month + "-" + date.getFullYear() + " a " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " a transféré " + dataSnapshot.val().amount + " ß a " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> Le " + date.getDate() + "-" + month + "-" + date.getFullYear() + " a " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         }
       })
@@ -512,7 +514,7 @@ async function lend() {
   var payments = Math.round(amount * (1 + (i/100))/weeks)
   console.log(amount, weeks, i, payments)
   if ((weeks - Math.floor(weeks)) != 0 || weeks == 0) {
-    document.getElementById("time-error").innerHTML = "Please enter a valid number of weeks"
+    document.getElementById("time-error").innerHTML = "Entrez un nombre de semaine valide SVP (nombre pas virgule)"
     return
   } else {
     document.getElementById("time-error").innerHTML = ""
@@ -529,7 +531,7 @@ async function lend() {
     target : name,
     amount : amount
   })
-  document.getElementById("result").innerHTML = "lended succesfully"
+  document.getElementById("result").innerHTML = "Empreint reussit"
 }
 
 async function update() {
