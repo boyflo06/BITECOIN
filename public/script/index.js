@@ -25,28 +25,79 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
+indexPage();
+document.getElementById("header-text").addEventListener("click", indexPage)
 
-if (document.querySelector("title").innerHTML == "Home") {
-  document.getElementById("register-button").addEventListener("click", function() {
-    window.location.replace("./sign-up.html")
-  })
-  document.getElementById("login-button").addEventListener("click", function() {
-    window.location.replace("./login.html")
-  })
+function indexPage() {
+  if (document.querySelector("section") != null) {
+    document.querySelector("section").remove()
+  }
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    "<section id='info'>"
+        + "<p>The ONLY banking app approved by the FDO</p>"
+        + "<p>User friendly and easy to use</p>"
+        + "<p>Join <span style='font-weight: bolder;'>today</span> for free</p>"
+        + "<a id='register-button'><button><p style='margin: 0;'>Register</p></button></a><br>"
+        + "<a id='login-button'>Already have an account? Sign-In</a>"
+    + "</section>"
+  )
+  document.getElementById("register-button").addEventListener("click", signupPage
+  )
+  document.getElementById("login-button").addEventListener("click", loginPage
+  )
 }
-if (document.querySelector("title").innerHTML == "Sign-Up") {
+
+
+function signupPage () {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    '<section id="login">'
+      +'<h1>Register</h1>'
+      +'<input type="text" placeholder="Name" id="name-input"><br>'
+      +'<input type="email" placeholder="E-mail" id="email-input" style="margin-top: 20px;"><br>'
+      +'<p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>'
+      +'<input type="password" placeholder="Password" id="pswrd-input" style="margin-top: 10px;"><br>'
+      +'<p style="font-size: 12px; color: red;margin-top: 0;" id="pswrd-error"></p>'
+      +'<input type="password" placeholder="Confirm Password" style="margin-top: 10px;" id="pswrd-confirm-input"><br>'
+      +'<p style="font-size: 12px; color: red;margin-top: 0;" id="value-error"></p>'
+      +'<button style="margin-top: 20px;" id="signup-button">Sign-Up</button><br>'
+      +'<a id="login-button">Already have an account : Sign-In</a>'
+    +'</section>'
+  )
   document.getElementById("signup-button").addEventListener("click", register)
-  document.getElementById("login-button").addEventListener("click", function() {
-    window.location.replace("./login.html")
-  })
+  document.getElementById("login-button").addEventListener("click", loginPage
+  )
 }
-if (document.querySelector("title").innerHTML == "Log-In") {
+function loginPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    '<section id="login">'
+    +'<h1>Sign-In</h1>'
+    +'<p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>'
+    +'<input type="email" placeholder="E-mail" id="email-input"><br>'
+    +'<input type="password" placeholder="Password" style="margin-top: 20px;" id="pswrd-input"><br>'
+    +'<button style="margin-top: 20px;" id="signin-button">Sign-In</button><br>'
+    +"<a id='register-button'>Don't have an account : Register</a>"
+    +'</section>'
+  )
   document.getElementById("signin-button").addEventListener("click", login)
-  document.getElementById("register-button").addEventListener("click", function() {
-    window.location.replace("./sign-up.html")
-  })
+  document.getElementById("register-button").addEventListener("click", signupPage)
 }
-if (document.querySelector("title").innerHTML == "User") {
+function userPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    '<section id="login">'
+      +'<h1 id="name" style="margin-bottom: 0;"></h1>'
+      +'<p id="id" style="margin-top: 0; font-size: 14px; margin-bottom: 0;"></p>'
+      +'<p id="role" style="margin-top: 0; font-size: 15px;"></p>'
+      +'<h1 id="bank" style="margin-bottom: 0;"></h1>'
+      +'<p id="revenue" style="margin-top: 0;"></p>'
+      +'<div style="margin-bottom: 5px;"><a id="transfer-button"><button><p style="margin: 0;">Transferer</p></button></a></div><br>'
+      +'<div style="margin-bottom: 5px"><a id="lend-button"><button><p style="margin: 0;">Demander</p></button></a></div><br>'
+      +'<div style="margin-bottom: 5px"><a id="userlogs-button"><button><p style="margin: 0;">Historique</p></button></a></div><br>'
+      +'<a id="logout">Log-Out</a>'
+    +'</section>'
+  )
   onAuthStateChanged(auth, (user) => {
     if (user) {
       var uid = user.uid
@@ -78,17 +129,38 @@ if (document.querySelector("title").innerHTML == "User") {
         }
         if (snapshot.val().admin == true) {
           document.getElementById("logout").insertAdjacentHTML("beforebegin", 
-            "<div style='margin-bottom: 5px'><a href='./admin.html'><button><p style='margin: 0;'>Admin Pannel</p></button></a></div><br>"
+            "<div style='margin-bottom: 5px'><a id='admin-button'><button><p style='margin: 0;'>Admin Pannel</p></button></a></div><br>"
           )
+          document.getElementById("admin-button").addEventListener("click", adminPage)
         }
       })
       document.getElementById("logout").addEventListener("click", signout)
+      document.getElementById("transfer-button").addEventListener("click", transferPage)
+      document.getElementById("userlogs-button").addEventListener("click", userlogsPage)
+      document.getElementById("lend-button").addEventListener("click", lendPage)
+      document.getElementById("admin-button").addEventListener("click", update)
     } else {
-      window.location.href = "./index.html"
+      indexPage()
     }
   })
 }
-if (document.querySelector("title").innerHTML == "Transferer") {
+function transferPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    '<section id="info">'
+      +'<h1>Transférer</h1>'
+      +'<p id="bank" style="margin-bottom: 0;"></p>'
+      +'<input placeholder="amount" style="margin-top: 20px;" id="amount-input"><br>'
+      +'<p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>'
+      +'<select id="id-select" style="margin-top: 15px; width: 16.5pc;">'
+        +'<option value="none" id="under-me">-- Please choose an option --</option>'
+      +'</select>'
+      +'<p style="margin: 0; font-size: 14px; color:red;" id="id-error"></p>'
+      +'<button style="margin-top: 20px;" id="transfer-button"><p style="margin: 0px;">Envoyer</p></button><br>'
+      +'<p style="color: green;" id="result"></p>'
+      +'<a id="back-button">Retour</a>'
+    +'</section>'
+  )
   onAuthStateChanged(auth, (user) => {
     if (user) {
       var uid = user.uid
@@ -108,12 +180,21 @@ if (document.querySelector("title").innerHTML == "Transferer") {
           })
         })
       document.getElementById("transfer-button").addEventListener("click", transfer)
+      document.getElementById("back-button").addEventListener("click", userPage)
     } else {
-      window.location.href = "./index.html"
+      indexPage()
     }
   })
 }
-if (document.querySelector("title").innerHTML == "Historique"){
+function userlogsPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    '<section id="login">'
+      +'<a id="back-button">Retour</a>'
+      +'<h1>Historique de transactions</h1>'
+      +'<p id="under-me"></p>'
+    +'</section>'
+  )
   onAuthStateChanged(auth, (user) => {
     if (user) {
       var uid = user.uid
@@ -121,11 +202,24 @@ if (document.querySelector("title").innerHTML == "Historique"){
       console.log(uid)
       userlogs()
     } else {
-      window.location.href = "./index.html"
+      indexPage()
     }
   })
+  document.getElementById("back-button").addEventListener("click", userPage)
 }
-if (document.querySelector("title").innerHTML == "Admin Pannel") {
+function adminPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    '<section id="login">'
+      +'<a id="back-button">Retour</a>'
+      +'<h1>Admin Pannel</h1>'
+      +'<h2 id="historique-title">Historique de transactions</h2>'
+      +'<div id="historique" style="display: none;">'
+          +'<p id="under-me"></p>'
+      +'</div>'
+      +'<button id="weekly-update"><h2 style="margin: 0;">Weekly Update</h2></button>'
+    +'</section>'
+  )
   onAuthStateChanged(auth, (user) => {
     if (user) {
       var uid = user.uid
@@ -135,24 +229,44 @@ if (document.querySelector("title").innerHTML == "Admin Pannel") {
         if (snapshot.val().admin == true) {
           document.getElementById("historique-title").addEventListener("click", toggledisplay)
           adminlogs()
+          document.getElementById("weekly-update").addEventListener("click", update)
+          document.getElementById("back-button").addEventListener("click", userPage)
         } else {
-          window.location.href = "./user.html"
+          userPage()
         }
       })
     } else {
-      window.location.href = "./index.html"
+      indexPage()
     }
   })
 }
-if (document.querySelector("title").innerHTML == "Demander"){
+function lendPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend", 
+    '<section id="info">'
+      +'<h1>Demander</h1>'
+      +'<p id="bank" style="margin-bottom: 0;"></p>'
+      +'<input placeholder="amount" style="margin-top: 20px;" id="amount-input"><br>'
+      +'<p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>'
+      +'<input placeholder="time" style="margin-top: 20px;" id="time-input"><br>'
+      +'<p style="margin: 0; font-size: 14px; color:red;" id="time-error"></p>'
+      +'<p style="margin: 0; font-size: 14px;">Le temps mis fait varier le nombre de fois le remboursement est divisé<br>et determine la valeur de l' + "'" + 'interet dans la logique que 1 semaine = +0,5%.</p>'
+      +'<p style="font-size: 14px;">Donc si vous metez amount = 100000 et time = 20,<br>vous devrez rembourser 110000 ß divisé en payements de 5500 ß</p>'
+      +'<p style="font-size: 14px;">Si vous ne savez pas repayer la banque, votre solde sera negatif</p>'
+      +'<button style="margin-top: 20px;" id="lend-button"><p style="margin: 0px;">Envoyer</p></button><br>'
+      +'<p style="color: green;" id="result"></p>'
+      +'<a id="back-button">Retour</a>'
+    +'</section>'
+  )
   onAuthStateChanged(auth, (user) => {
     if (user) {
       var uid = user.uid
       db = getDatabase()
       console.log(uid)
       document.getElementById("lend-button").addEventListener("click", lend)
+      document.getElementById("back-button").addEventListener("click", userPage)
     } else {
-      window.location.href = "./index.html"
+      indexPage()
     }
   })
 }
@@ -206,7 +320,7 @@ async function register () {
     });
 
     // DOne
-    window.location.href = "./user.html"
+    userPage()
   })
   .catch(function(error) {
     // Firebase will use this to alert of its errors
@@ -242,7 +356,7 @@ function login () {
 
     // DOne
     console.log('gud')
-    window.location.replace("./user.html")
+    userPage()
 
 
   })
@@ -255,9 +369,9 @@ function login () {
   })
 }
 
-function signout() {
-  signOut(auth)
-  setTimeout(() => {window.location.href = "./index.html";}, 500)
+async function signout() {
+  await signOut(auth)
+  indexPage
 }
 
 async function transfer() {
@@ -416,6 +530,113 @@ async function lend() {
     amount : amount
   })
   document.getElementById("result").innerHTML = "lended succesfully"
+}
+
+async function update() {
+
+  //salaires et prêts
+  get(child(ref(db), "users"))
+      .then((snapshot)=>{
+          snapshot.forEach((dataSnapshot)=>{
+
+              //salaires
+              var name = String(dataSnapshot.val().name)
+              var role = String(dataSnapshot.val().role)
+              var bank = Number(dataSnapshot.val().bank)
+              var verified = dataSnapshot.val().verified
+              var dbref = ref(db, "users/" + dataSnapshot.key + "/bank")
+              console.log(role, bank, verified,)
+              
+              if (verified == true) {
+                  if (role == "sans-emploie") {
+                      set(dbref, bank + 800)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 800
+                      })
+                      bank = bank + 800
+                  } else if (role == "membre") {
+                      set(dbref, bank + 1200)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 1200
+                      })
+                      bank = bank + 1200
+                  } else if (role == "avocat" || role == "gestionnaire de propriété") {
+                      set(dbref, bank + 1500)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 1500
+                      })
+                      bank = bank + 1500
+                  } else if (role == "conseiller") {
+                      set(dbref, bank + 2000)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 2000
+                      })
+                      bank = bank + 2000
+                  } else if (role == "ministre" || role == "magistrat" || role == "premier ministre") {
+                      set(dbref, bank + 2500)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 2500
+                      })
+                      bank = bank + 2500
+                  } else if (role == "ministre des finances") {
+                      set(dbref, bank + 3000)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 3000
+                      })
+                      bank = bank + 3000
+                  } else if (role == "administrateur delegay") {
+                      set(dbref, bank + 3500)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 3500
+                      })
+                      bank = bank + 3500
+                  } else if (role == "administrateur supreme") {
+                      set(dbref, bank + 4750)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          target : name,
+                          amount : 4750
+                      })
+                      bank = bank + 4750
+                  }
+              }
+
+              //prêts
+              dataSnapshot.forEach((snapshotDataSnapshot)=>{
+                  if (snapshotDataSnapshot.key == "lend") {
+                      snapshotDataSnapshot.forEach((dataSnapshotDataSnapshot)=>{
+                          var payment = Number(dataSnapshotDataSnapshot.val().payments)
+                          var weeks_left = Number(dataSnapshotDataSnapshot.val().weeks_left) - 1
+                          set(ref(db, "users/" + dataSnapshot.key + "/bank"), bank - payment)
+                          if (weeks_left == 0) {
+                              remove(ref(db, "users/" + dataSnapshot.key + "/lend/" + dataSnapshotDataSnapshot.key))
+                          } else {
+                              set(ref(db, "users/" + dataSnapshot.key + "/lend/" + dataSnapshotDataSnapshot.key + "/weeks_left"), weeks_left)
+                          }
+                          set(ref(db, "transactions/" + Date.now()), {
+                              name : name,
+                              target : "bank",
+                              amount : payment,
+                          })
+                      })
+                  }
+              })
+          })
+      })
 }
 
 //Validation functions
