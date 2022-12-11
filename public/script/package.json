@@ -3,8 +3,8 @@
     "name" : "bitecoin_banking_app",
     "icons" : [
         {
-            "src": "/public/style/529238D8-2393-463A-A6B3-C8D16B51DD68.jpeg",
-            "type": "image/gif",
+            "src": "/public/style/logo.png",
+            "type": "image/png",
             "sizes": "512x512"
         }
     ],
@@ -12,11 +12,5 @@
     "background_color": "#C4E5FF",
     "display": "standalone",
     "theme_color": "#C4E5FF",
-    "scope": "/public/",
-    "shortcuts": [
-        {
-            "name": "login"
-            "url": "/public/login"
-        }
-    ]
+    "scope": "/public/"
 }
