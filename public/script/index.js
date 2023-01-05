@@ -2,7 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
 import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js"
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -29,6 +29,9 @@ var db = getDatabase();
 if (document.querySelector("title").innerHTML == "Sign-Up") {
   document.getElementById("signup-button").addEventListener("click", register)
 }
+if (document.querySelector("title").innerHTML == "Sign-Up Entreprise") {
+  document.getElementById("signup-button").addEventListener("click", registerEntreprise)
+}
 if (document.querySelector("title").innerHTML == "Log-In") {
   document.getElementById("signin-button").addEventListener("click", login)
 }
@@ -39,36 +42,73 @@ if (document.querySelector("title").innerHTML == "User") {
       db = getDatabase()
       console.log(uid)
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
-        document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
-        document.getElementById("id").innerHTML = "ID : " + uid
-        document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
-        var userrole = snapshot.val().role
-        const revenue = document.getElementById("revenue")
-        document.getElementById("role").innerHTML = "(role : " + userrole + ")"
-        if (userrole == "sans-emploie") {
-          revenue.innerHTML = "800 ß/week"
-        } else if (userrole == "membre") {
-          revenue.innerHTML = "1200 ß/week"
-        } else if (userrole == "avocat" || userrole == "gestionnaire de propriété") {
-          revenue.innerHTML = "1500 ß/week"
-        } else if (userrole == "conseiller") {
-          revenue.innerHTML = "2000 ß/week"
-        } else if (userrole == "ministre" || userrole == "magistrat" || userrole == "premier ministre") {
-          revenue.innerHTML = "2500 ß/week"
-        } else if (userrole == "minsitre des finances") {
-          revenue.innerHTML = "3000 ß/week"
-        } else if (userrole == "administrateur delegay") {
-          revenue.innerHTML = "3500 ß/week"
-        } else if (userrole == "administrateur supreme") {
-          revenue.innerHTML = "4750 ß/week"
-        }
-        if (snapshot.val().admin == true) {
-          document.getElementById("logout").insertAdjacentHTML("beforebegin", 
-            "<div style='margin-bottom: 5px'><a href='./admin.html'><button><p style='margin: 0;'>Admin Pannel</p></button></a></div><br>"
-          )
+        if (snapshot.exists() == true) {
+          document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
+          document.getElementById("id").innerHTML = "ID : " + uid
+          document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+          var userrole = snapshot.val().role
+          const revenue = document.getElementById("revenue")
+          document.getElementById("role").innerHTML = "(role : " + userrole + ")"
+          if (userrole == "sans-emploie") {
+            revenue.innerHTML = "800 ß/week"
+          } else if (userrole == "membre") {
+            revenue.innerHTML = "1200 ß/week"
+          } else if (userrole == "avocat" || userrole == "gestionnaire de propriété") {
+            revenue.innerHTML = "1500 ß/week"
+          } else if (userrole == "conseiller") {
+            revenue.innerHTML = "2000 ß/week"
+          } else if (userrole == "ministre" || userrole == "magistrat" || userrole == "premier ministre") {
+            revenue.innerHTML = "2500 ß/week"
+          } else if (userrole == "minsitre des finances") {
+            revenue.innerHTML = "3000 ß/week"
+          } else if (userrole == "administrateur delegay") {
+            revenue.innerHTML = "3500 ß/week"
+          } else if (userrole == "administrateur supreme") {
+            revenue.innerHTML = "4750 ß/week"
+          }
+          if (snapshot.val().admin == true) {
+            document.getElementById("logout").insertAdjacentHTML("beforebegin", 
+              "<div style='margin-bottom: 5px'><a href='./admin.html'><button><p style='margin: 0;'>Admin Pannel</p></button></a></div><br>"
+            )
+          }
+        } else {
+          get(child(ref(db), "entreprises/" + uid)).then((snapshot) => {
+            document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
+            document.getElementById("id").innerHTML = "ID : " + uid
+            document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+            document.getElementById("links").innerHTML = ""
+            document.getElementById("links").insertAdjacentHTML("afterbegin", 
+              "<div style='margin-bottom: 5px;'><a href='./transfer.html'><button><p style='margin: 0;'>Transferer</p></button></a></div><br>" +
+              "<div style='margin-bottom: 5px;'><a href='./transfer.html'><button><p style='margin: 0;'>Factures</p></button></a></div><br>" +
+              "<div style='margin-bottom: 5px;'><a href='./transfer.html'><button><p style='margin: 0;'>Historique</p></button></a></div><br>"
+            )
+          })
         }
       })
       document.getElementById("logout").addEventListener("click", signout)
+      get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+        if (snapshot.exists() == true) {
+          console.log(snapshot.val().verified)
+          if (snapshot.val().verified == false) {
+            document.getElementById("name").insertAdjacentHTML("beforebegin", 
+            "<h2 style='color: red; margin-bottom: 0px;'>Votre adresse email n'est pas vérifié!</h2><br>" + 
+            "<p style='color: red; margin-top: 0px; font-size: 15px;' id='verify-text'>Faites une demande au près d'un administrateur</p>"
+            )
+            document.getElementById("links").remove()
+          }
+        } else {
+          get(child(ref(db), "entreprises/" + uid)).then((snapshot)=>{
+            console.log(snapshot.val().verified)
+            if (snapshot.val().verified == false) {
+              document.getElementById("name").insertAdjacentHTML("beforebegin", 
+              "<h2 style='color: red; margin-bottom: 0px;'>Votre adresse email n'est pas vérifié!</h2><br>" + 
+              "<p style='color: red; margin-top: 0px; font-size: 15px;' id='verify-text'>Faites une demande au près d'un administrateur</p>"
+              )
+              document.getElementById("links").remove()
+            }
+          })
+        }
+      })
     } else {
       window.location.href = "./index.html"
     }
@@ -195,6 +235,66 @@ async function register () {
   })
 }
 
+async function registerEntreprise () {
+  // Get all our input fields
+  var name = document.getElementById("name-input").value
+  var email = document.getElementById('email-input').value
+  var password = document.getElementById('pswrd-input').value
+  var password2 = document.getElementById("pswrd-confirm-input").value
+
+  // Validate input fields
+  if (validate_email(email) == false) {
+    document.getElementById("email-error").innerHTML = 'Email is Outta Line!!'
+    return
+    // Don't continue running the code
+  } else {
+    document.getElementById("email-error").innerHTML = ''
+  }
+  if (validate_password(password, password2) == false) {
+    document.getElementById("pswrd-error").innerHTML = "Password is too short or doesnt match"
+    return
+  } else {
+    document.getElementById("pswrd-error").innerHTML = ''
+  }
+  if (validate_field(name) == false || validate_field(email) == false || validate_field(password) == false || validate_field(password2) == false) {
+    document.getElementById("value-error").innerHTML = 'One or More Extra Fields is Outta Line!!'
+    return
+  } else {
+    document.getElementById("value-error").innerHTML = ''
+  }
+ 
+  // Move on with Auth
+  createUserWithEmailAndPassword(auth, email, password)
+  .then(async function() {
+    // Declare user variable
+    var user = auth.currentUser
+    var uid = user.uid
+    var db = getDatabase()
+
+    // Add this user to Firebase Database
+    await set(ref(db, 'entreprises/' + uid), {
+      email : email,
+      name : name,
+      bank : 0,
+      verified : false,
+      lend : "",
+      last_login : Date.now()
+    });
+
+    // DOne
+    window.location.href = "./user.html"
+  })
+  .catch(function(error) {
+    // Firebase will use this to alert of its errors
+    var error_code = error.code
+    var error_message = error.message
+    if (error_message == "Firebase: Error (auth/email-already-in-use).") {
+      document.getElementById("email-error").innerHTML = "Email is already linked to an account!"
+    }
+    console.log(error_message)
+  })
+}
+
 function login () {
   // Get all our input fields
   var email = document.getElementById('email-input').value
@@ -227,7 +327,10 @@ function login () {
     var error_code = error.code
     var error_message = error.message
 
-    alert(error_message)
+    console.log(error_code)
+    if (error_code == "auth/wrong-password") {
+      document.getElementById("email-error").innerHTML = "L'émail ou le MDP est incorecte"
+    }
   })
 }
 
@@ -305,11 +408,11 @@ async function userlogs() {
         console.log(dataSnapshot.val())
         var date = new Date(Number(dataSnapshot.key))
         var month = Number(date.getMonth()) + Number(1)
-        if (dataSnapshot.val().name == "bank") {
+        if (dataSnapshot.val().name == "bank" && dataSnapshot.val().target == name) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
-        } else if (dataSnapshot.val().target == "bank") {
+        } else if (dataSnapshot.val().target == "bank" && dataSnapshot.val().name == name) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
@@ -408,7 +511,7 @@ function validate_email(email) {
 
 function validate_password(password, password2) {
   // Firebase only accepts lengths greater than 6
-  if (password < 6) {
+  if (password.length < 6) {
     return false
   } else if (password != password2) {
     return false
