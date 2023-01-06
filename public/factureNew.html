@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nouvelle Facture</title>
+    <link rel="icon" href="./style/529238D8-2393-463A-A6B3-C8D16B51DD68.jpeg" type="image/gif">
+    <link rel="stylesheet" href="./style/main.css">
+</head>
+<body>
+    <header>
+        <div id="greyed-out"></div>
+        <a id="header-text" href="./index.html">
+            <h1>BITECOIN BANKING</h1>
+            <p>Made for the best, by the best</p>
+        </a>
+    </header>
+    <section id="info">
+        <h1>Créer une facture</h1>
+        <p style="margin: 0; font-size: 14px; color:red;" id="id-error"></p>
+        <select id="ids" style="width: 16.5pc; height: 3.5pc;">
+            <option value="none">-- Please Choose an Option --</option>
+            <optgroup label="particuliers" id="particuliers">
+            </optgroup>
+            <optgroup label="entreprises" id="entreprises">
+            </optgroup>
+        </select><br>
+        <p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>
+        <input placeholder="montant" id="amount-input" style="margin: 10px; margin-bottom: 0;"><br>
+        <p style="margin: 0; font-size: 14px; color:red;" id="checkbox-error"></p>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <input type="checkbox" style="width: 2pc;"  id="confirm">
+            <p style="font-weight: normal; font-size: 16px;">Êtes-vous sûr?</p>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 15px;">
+            <button style="display: flex; justify-content: center; align-items: center;" id="creer"><p>Créer</p></button>
+        </div>
+        <a href="./factures.html">Retour</a>
+    </section>
+</body>
+<script src="./script/index.js" type="module"></script>
+</html>

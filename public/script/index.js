@@ -42,7 +42,7 @@ if (document.querySelector("title").innerHTML == "User") {
       db = getDatabase()
       console.log(uid)
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
-        if (snapshot.exists() == true) {
+        if (snapshot.val().entreprise == false) {
           document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
           document.getElementById("id").innerHTML = "ID : " + uid
           document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
@@ -72,17 +72,15 @@ if (document.querySelector("title").innerHTML == "User") {
             )
           }
         } else {
-          get(child(ref(db), "entreprises/" + uid)).then((snapshot) => {
-            document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
-            document.getElementById("id").innerHTML = "ID : " + uid
-            document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
-            document.getElementById("links").innerHTML = ""
-            document.getElementById("links").insertAdjacentHTML("afterbegin", 
-              "<div style='margin-bottom: 5px;'><a href='./transfer.html'><button><p style='margin: 0;'>Transferer</p></button></a></div><br>" +
-              "<div style='margin-bottom: 5px;'><a href='./transfer.html'><button><p style='margin: 0;'>Factures</p></button></a></div><br>" +
-              "<div style='margin-bottom: 5px;'><a href='./transfer.html'><button><p style='margin: 0;'>Historique</p></button></a></div><br>"
-            )
-          })
+          document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
+          document.getElementById("id").innerHTML = "ID : " + uid
+          document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+          document.getElementById("links").innerHTML = ""
+          document.getElementById("links").insertAdjacentHTML("afterbegin",
+            "<div style='margin-bottom: 5px;'><a href='./transfer.html'><button><p style='margin: 0;'>Transferer</p></button></a></div><br>" +
+            "<div style='margin-bottom: 5px;'><a href='./factures.html'><button><p style='margin: 0;'>Factures</p></button></a></div><br>" +
+            "<div style='margin-bottom: 5px;'><a href='./userlogs.html'><button><p style='margin: 0;'>Historique</p></button></a></div><br>"
+          )
         }
       })
       document.getElementById("logout").addEventListener("click", signout)
@@ -172,6 +170,52 @@ if (document.querySelector("title").innerHTML == "Demander"){
     }
   })
 }
+if (document.querySelector("title").innerHTML == "Factures") {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+        if (snapshot.val().entreprise == true) {
+          document.getElementById("list").insertAdjacentHTML("beforebegin", 
+            "<div style='margin-bottom: 5px;'><a href='./factureNew.html'><button><p style='margin: 0;'>Créer nouveau</p></button></a></div><br>"
+          )
+        }
+        document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+        factureList()
+      })
+    } else {
+      window.location.href = "./index.html"
+    }
+  })
+}
+if (document.querySelector("title").innerHTML == "Nouvelle Facture") {
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      console.log(uid)
+      get(child(ref(db), "users")).then((snapshot) =>{
+        snapshot.forEach((dataSnapshot)=>{
+          if (dataSnapshot.key != uid) {
+            if(dataSnapshot.val().entreprise == false) {
+              document.getElementById("particuliers").insertAdjacentHTML("beforeend", 
+                "<option value='" + dataSnapshot.key + "' id='under-me'>" + dataSnapshot.val().name + " (id : " + dataSnapshot.key + ")" + "</option>"
+              )
+            } else {
+              document.getElementById("entreprises").insertAdjacentHTML("beforeend", 
+                "<option value='" + dataSnapshot.key + "' id='under-me'>" + dataSnapshot.val().name + " (id : " + dataSnapshot.key + ")" + "</option>"
+              )
+            }
+          }
+        })
+      })
+      document.getElementById("creer").addEventListener("click", newFacture)
+    } else {
+      window.location.href = "./index.html"
+    }
+  })
+}
 
 async function register () {
   // Get all our input fields
@@ -217,6 +261,7 @@ async function register () {
       role : "sans-emploie",
       verified : false,
       lend : "",
+      entreprise : false,
       admin : false,
       last_login : Date.now()
     });
@@ -272,12 +317,13 @@ async function registerEntreprise () {
     var db = getDatabase()
 
     // Add this user to Firebase Database
-    await set(ref(db, 'entreprises/' + uid), {
+    await set(ref(db, 'users/' + uid), {
       email : email,
       name : name,
       bank : 0,
       verified : false,
       lend : "",
+      entreprise : true,
       last_login : Date.now()
     });
 
@@ -377,15 +423,9 @@ async function transfer() {
   await set(ref(db, "users/" + id + "/bank"), Number(tbank)+Number(amount))
 
   //Log transfer to database
-  var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
-    return snapshot.val().name
-  })
-  var tname = await get(child(ref(db), "users/" + id)).then((snapshot)=>{
-    return snapshot.val().name
-  })
   await set(ref(db, "transactions/" + Date.now()), {
-    name : name,
-    target : tname,
+    name : uid,
+    target : id,
     amount : amount
   })
 
@@ -398,31 +438,28 @@ async function userlogs() {
   var user = auth.currentUser
   var uid = user.uid
 
-  var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
-    return snapshot.val().name
-  })
-
   get(child(ref(db),"transactions"))
     .then((snapshot)=>{
-      snapshot.forEach((dataSnapshot)=>{
-        console.log(dataSnapshot.val())
+      snapshot.forEach(async (dataSnapshot)=>{
         var date = new Date(Number(dataSnapshot.key))
         var month = Number(date.getMonth()) + Number(1)
-        if (dataSnapshot.val().name == "bank" && dataSnapshot.val().target == name) {
+        var target = await get(child(ref(db), "users/" + dataSnapshot.val().target)).then((snapshotDataSnapshot)=>{ return snapshotDataSnapshot.val().name})
+        var name = await get(child(ref(db), "users/" + dataSnapshot.val().name)).then((snapshotDataSnapshot)=>{ return snapshotDataSnapshot.val().name})
+        if (dataSnapshot.val().name == "bank" && dataSnapshot.val().target == uid) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Lended " + dataSnapshot.val().amount + " ß to the " + name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
-        } else if (dataSnapshot.val().target == "bank" && dataSnapshot.val().name == name) {
+        } else if (dataSnapshot.val().target == "bank" && dataSnapshot.val().name == uid) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Refunded " + dataSnapshot.val().amount + " ß to the " + target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
-        } else if (dataSnapshot.val().name == name) {
+        } else if (dataSnapshot.val().name == uid) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Transfered " + dataSnapshot.val().amount + " ß to " + target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
-        } else if (dataSnapshot.val().target == name) {
+        } else if (dataSnapshot.val().target == uid) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Recieved " + dataSnapshot.val().amount + " ß from " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Recieved " + dataSnapshot.val().amount + " ß from " + name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         }
       })
@@ -433,20 +470,22 @@ async function adminlogs() {
   var db = getDatabase()
   get(child(ref(db), "transactions"))
     .then((snapshot)=>{
-      snapshot.forEach((dataSnapshot)=>{
+      snapshot.forEach(async (dataSnapshot)=>{
         var date = new Date(Number(dataSnapshot.key))
         var month = Number(date.getMonth()) + Number(1)
+        var target = await get(child(ref(db), "users/" + dataSnapshot.val().target)).then((snapshotDataSnapshot)=>{ return snapshotDataSnapshot.val().name})
+        var name = await get(child(ref(db), "users/" + dataSnapshot.val().name)).then((snapshotDataSnapshot)=>{ return snapshotDataSnapshot.val().name})
         if (dataSnapshot.val().name == "bank") {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().target + " lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + target + " lended " + dataSnapshot.val().amount + " ß to the " + name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else if (dataSnapshot.val().target == "bank") {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + name + " refunded " + dataSnapshot.val().amount + " ß to the " + target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         } else {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
-            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " transfered " + dataSnapshot.val().amount + " ß to " + dataSnapshot.val().target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
+            "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + name + " transfered " + dataSnapshot.val().amount + " ß to " + target + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
         }
       })
@@ -464,9 +503,6 @@ async function lend() {
   var user = auth.currentUser
   var uid = user.uid
 
-  var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
-    return snapshot.val().name
-  })
   var bank = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
     return snapshot.val().bank
   })
@@ -491,10 +527,337 @@ async function lend() {
   set(ref(db, "users/" + uid + "/bank"), Number(bank) + amount)
   set(ref(db, "transactions/" + Date.now()), {
     name : "bank",
-    target : name,
+    target : uid,
     amount : amount
   })
   document.getElementById("result").innerHTML = "lended succesfully"
+}
+
+async function newFacture() {
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+
+  //input values
+  var target = document.getElementById("ids").value
+  var amount = Number(document.getElementById("amount-input").value)
+  var confirm = document.getElementById("confirm").checked
+  //test input values
+  if (target == "none") {
+    document.getElementById("id-error").innerHTML = "Veuillez entrer un utilisateur existant"
+  }
+  document.getElementById("id-error").innerHTML = ""
+  if (/^\d+$/.test(amount) == false) {
+    document.getElementById("amount-error").innerHTML = "Veuillez entrer un nombre (sans symbols)"
+  }
+  document.getElementById("amount-error").innerHTML = ""
+  if (confirm == false) {
+    document.getElementById("checkbox-error").innerHTML = "Veuillez confirmer votre choix"
+  }
+  document.getElementById("checkbox-error").innerHTML = ""
+  //create the facture
+  await set(ref(db, "factures/" + Date.now()), {
+    name : uid,
+    target : target,
+    amount : amount
+  })
+  //done
+  window.location.href = "./factures.html"
+}
+
+async function factureList() {
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+
+  get(child(ref(db), "factures")).then((snapshot)=>{
+    snapshot.forEach(async (dataSnapshot)=>{
+      var date = new Date(Number(dataSnapshot.key))
+      console.log(date.getTime())
+      var today = new Date()
+      var daysSince = Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24))
+      if (dataSnapshot.val().name == uid) {
+        var name = await get(child(ref(db), "users/" + dataSnapshot.val().target)).then((snapshotDataSnapshot)=>{ return snapshotDataSnapshot.val().name})
+        if (dataSnapshot.val().rappel3 != null) {
+          var lastRemind = new Date(Number(dataSnapshot.val().rappel3))
+          var daysSinceLastRemind = Math.floor((today.getTime() - lastRemind.getTime()) / (1000 * 3600 * 24))
+          document.getElementById("list").insertAdjacentHTML("beforeend", 
+          `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Sortant</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                  <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
+                  <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + daysSince + `j</p>
+                </div>
+              </div>
+            </div>`
+          )
+        } else if (dataSnapshot.val().rappel2 != null) {
+          var lastRemind = new Date(Number(dataSnapshot.val().rappel2))
+          var daysSinceLastRemind = Math.floor((today.getTime() - lastRemind.getTime()) / (1000 * 3600 * 24))
+          document.getElementById("list").insertAdjacentHTML("beforeend", 
+          `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Sortant</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                  <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
+                  <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + daysSince + `j</p>
+                </div>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rapeler</p></button>
+              </div>
+            </div>`
+          )
+          document.getElementById("remind-"+dataSnapshot.key).addEventListener("click", () => {
+            remind(dataSnapshot.key)
+          })
+        } else if (dataSnapshot.val().rappel1 != null) {
+          var lastRemind = new Date(Number(dataSnapshot.val().rappel1))
+          var daysSinceLastRemind = Math.floor((today.getTime() - lastRemind.getTime()) / (1000 * 3600 * 24))
+          document.getElementById("list").insertAdjacentHTML("beforeend", 
+          `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Sortant</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                  <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
+                  <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + daysSince + `j</p>
+                </div>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rapeler</p></button>
+              </div>
+            </div>`
+          )
+          document.getElementById("remind-"+dataSnapshot.key).addEventListener("click", () => {
+            remind(dataSnapshot.key)
+          })
+        } else {
+          document.getElementById("list").insertAdjacentHTML("beforeend", 
+          `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Sortant</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                  <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + daysSince + `j</p>
+                </div>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rapeler</p></button>
+              </div>
+            </div>`
+          )
+          document.getElementById("remind-"+dataSnapshot.key).addEventListener("click", () => {
+            remind(dataSnapshot.key)
+          })
+        }
+      }
+      if (dataSnapshot.val().target == uid) {
+        var name = await get(child(ref(db), "users/" + dataSnapshot.val().name)).then((snapshotDataSnapshot)=>{ return snapshotDataSnapshot.val().name})
+        if (dataSnapshot.val().rappel3 != null) {
+          var lastRemind = new Date(Number(dataSnapshot.val().rappel3))
+          var daysSinceLastRemind = Math.floor((today.getTime() - lastRemind.getTime()) / (1000 * 3600 * 24))
+          document.getElementById("list").insertAdjacentHTML("afterbegin",
+            `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Reçue</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Auteur : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                    <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
+                    <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + lastRemind + `j</p>
+                </div>
+              </div>
+            </div>`
+          )
+        } else if (dataSnapshot.val().rappel2 != null) {
+          var lastRemind = new Date(Number(dataSnapshot.val().rappel2))
+          var daysSinceLastRemind = Math.floor((today.getTime() - lastRemind.getTime()) / (1000 * 3600 * 24))
+          document.getElementById("list").insertAdjacentHTML("afterbegin",
+            `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Reçue</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Auteur : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                    <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
+                    <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + lastRemind + `j</p>
+                </div>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="pay-` + dataSnapshot.key + `"><p>Payer</p></button>
+              </div>
+            </div>`
+          )
+        } else if (dataSnapshot.val().rappel1 != null) {
+          var lastRemind = new Date(Number(dataSnapshot.val().rappel1))
+          var daysSinceLastRemind = Math.floor((today.getTime() - lastRemind.getTime()) / (1000 * 3600 * 24))
+          document.getElementById("list").insertAdjacentHTML("afterbegin",
+            `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Reçue</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Auteur : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/checked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                    <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
+                    <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + lastRemind + `j</p>
+                </div>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="pay-` + dataSnapshot.key + `"><p>Payer</p></button>
+              </div>
+            </div>`
+          )
+        } else {
+          document.getElementById("list").insertAdjacentHTML("afterbegin",
+            `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Reçue</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Auteur : ` + name + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Rappels :</p>
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">
+                <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;">  
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <div>
+                    <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
+                    <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + lastRemind + `j</p>
+                </div>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="pay-` + dataSnapshot.key + `"><p>Payer</p></button>
+              </div>
+            </div>`
+          )
+        }
+        document.getElementById("pay-"+dataSnapshot.key).addEventListener("click", () => {
+          pay(dataSnapshot.key)
+        })
+      }
+    })
+  })
+}
+
+async function remind(facture) {
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+  var today = new Date()
+
+  get(child(ref(db), "factures/" + facture)).then(async (snapshot)=>{
+    if (snapshot.val().rappel2 != null) {
+      var date = new Date(snapshot.key)
+      if (Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)) >= 5) {
+        await set(ref(db, "factures/" + facture + "/rappel3"), Date.now())
+      } else {
+        alert("Il faut attendre 5j pour faire le premier rappel")
+        return
+      }
+    } else if (snapshot.val().rappel1 != null) {
+      var date = new Date(snapshot.key)
+      if (Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)) >= 5) {
+        await set(ref(db, "factures/" + facture + "/rappel2"), Date.now())
+      } else {
+        alert("Il faut attendre 5j entre les rappels")
+        return
+      }
+    } else {
+      var date = new Date(snapshot.key)
+      if (Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)) >= 5) {
+        await set(ref(db, "factures/" + facture + "/rappel1"), Date.now())
+      } else {
+        alert("Il faut attendre 5j entre les rappels")
+        return
+      }
+    }
+  })
+}
+
+async function pay(facture) {
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+
+  //check if user has enough money
+  var fAmount = await get(child(ref(db), "factures/" + facture)).then((snapshot) => { return snapshot.val().amount })
+  var bank = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{ return snapshot.val().bank })
+  if (Number(fAmount) > Number(bank)) {
+    alert("You do not have enough money")
+    return
+  }
+  var benefUid = await get(child(ref(db), "factures/" + facture)).then((snapshot) => { return snapshot.val().name })
+  var benefBank = await get(child(ref(db), "users/" + benefUid)).then((snapshot) => { return snapshot.val().bank })
+
+  //update users bank
+  await set(ref(db, "users/" + uid + "/bank"), Number(bank) - Number(fAmount))
+
+  //update benef bank
+  await set(ref(db, "users/" + benefUid + "/bank"), Number(benefBank) + Number(fAmount))
+
+  //log transaction
+  await set(ref(db, "transactions/" + Date.now()), {
+    name : uid,
+    target : benefUid,
+    amount : fAmount
+  })
+
+  //remove facture
+  await set(ref(db, "factures/" + facture), null)
 }
 
 //Validation functions

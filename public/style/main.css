@@ -16,7 +16,7 @@ button {
     height: 3pc;
 }
 
-input {
+input, select {
     background-color: #D9D9D9;
     width: 15pc;
     height: 3pc;
@@ -24,13 +24,13 @@ input {
     padding-left: 20px;
     border: solid 2px #00000040;
 }
-input::placeholder {
+input::placeholder, option {
     text-align: left;
     font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
     font-style: normal;
 }
 
-h1, h2, p, a {
+h1, h2, h3, p, a {
     font-family: Avantgarde, TeX Gyre Adventor, URW Gothic L, sans-serif;
     font-style: normal;
 }
