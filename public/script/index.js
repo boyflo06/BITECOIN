@@ -28,6 +28,17 @@ var db = getDatabase();
 indexPage();
 document.getElementById("header-text").addEventListener("click", indexPage)
 
+const currentVersion = "1.0.0"
+
+get(child(ref(db), "appInfo")).then((snapshot)=>{
+  if (currentVersion != snapshot.val().version){
+    document.querySelector("header").insertAdjacentHTML("afterend",
+      `<h1 style="color: red;" id="alert">Vous utilisez une version obselete. Merci de mettre a jour l'app en la reinstallant</h1>`
+    )
+    document.querySelector("section").remove()
+  }
+})
+
 function indexPage() {
   if (document.querySelector("section") != null) {
     document.querySelector("section").remove()
