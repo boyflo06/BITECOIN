@@ -128,7 +128,6 @@ function userPage() {
     if (user) {
       var uid = user.uid
       db = getDatabase()
-      console.log(uid)
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
         if (snapshot.val().entreprise == false) {
           document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
@@ -222,7 +221,6 @@ function transferPage() {
     if (user) {
       var uid = user.uid
       db = getDatabase()
-      console.log(uid)
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
         document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
       })
@@ -262,7 +260,6 @@ function userlogsPage() {
     if (user) {
       var uid = user.uid
       db = getDatabase()
-      console.log(uid)
       userlogs()
     } else {
       indexPage()
@@ -280,6 +277,9 @@ function adminPage() {
       +'<div id="historique" style="display: none;">'
           +'<p id="under-me"></p>'
       +'</div>'
+      +'<h2 id="lendRequest-title">Demandes de prets</h2>'
+      +'<div id="lendRequests" style="display: none;">'
+      +'</div>'
       +'<button id="weekly-update"><h2 style="margin: 0;">Mise a jour hebdomadaire</h2></button>'
     +'</section>'
   )
@@ -287,11 +287,12 @@ function adminPage() {
     if (user) {
       var uid = user.uid
       db = getDatabase()
-      console.log(uid)
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
         if (snapshot.val().admin == true) {
-          document.getElementById("historique-title").addEventListener("click", toggledisplay)
+          document.getElementById("historique-title").addEventListener("click", function() {toggledisplay("historique")})
+          document.getElementById("lendRequest-title").addEventListener("click", function() {toggledisplay("lendRequests")})
           adminlogs()
+          showLendRequest()
           document.getElementById("weekly-update").addEventListener("click", update)
           document.getElementById("back-button").addEventListener("click", userPage)
         } else {
@@ -326,8 +327,6 @@ function lendPage() {
   onAuthStateChanged(auth, (user) => {
     if (user) {
       var uid = user.uid
-      db = getDatabase()
-      console.log(uid)
       document.getElementById("lend-button").addEventListener("click", lend)
       document.getElementById("back-button").addEventListener("click", userPage)
     } else {
@@ -351,7 +350,6 @@ function facturePage() {
       var uid = user.uid
       db = getDatabase()
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
-        console.log(snapshot.val())
         if (snapshot.val().entreprise == true) {
           document.getElementById("list").insertAdjacentHTML("beforebegin", 
             "<div style='margin-bottom: 5px;'><a id='newFacture-button'><button><p style='margin: 0;'>Créer nouveau</p></button></a></div><br>"
@@ -400,7 +398,6 @@ function newFacturePage() {
     if (user) {
       var uid = user.uid
       db = getDatabase()
-      console.log(uid)
       get(child(ref(db), "users")).then((snapshot) =>{
         snapshot.forEach((dataSnapshot)=>{
           if (dataSnapshot.key != uid) {
@@ -482,7 +479,6 @@ async function register () {
     if (error_message == "Firebase: Error (auth/email-already-in-use).") {
       document.getElementById("email-error").innerHTML = "Cette adresse émail est déja lié a un compte"
     }
-    console.log(error_message)
   })
 }
 
@@ -537,13 +533,12 @@ async function registerEntreprise () {
     userPage()
   })
   .catch(function(error) {
-    // Firebase will use this to alert of its errors
+    // Fi1rebase will use this to alert of its errors
     var error_code = error.code
     var error_message = error.message
     if (error_message == "Firebase: Error (auth/email-already-in-use).") {
       document.getElementById("email-error").innerHTML = "Email is already linked to an account!"
     }
-    console.log(error_message)
   })
 }
 
@@ -569,7 +564,6 @@ function login () {
     await set(ref(db, "users/" + uid + "/last_login"), Date.now())
 
     // DOne
-    console.log('gud')
     userPage()
 
 
@@ -631,7 +625,6 @@ async function transfer() {
     })
     .catch(function(error) {
       document.getElementById("id-error").innerHTML = "Cet identifiant n'est pas lié a un compte"
-      console.log("error code : " + error.message)
       return -1
     })
   if (tbank != -1) {
@@ -682,8 +675,7 @@ async function userlogs() {
 
   await get(child(ref(db),"transactions"))
     .then((snapshot)=>{
-      console.log(snapshot.forEach( (dataSnapshot)=>{
-        console.log(dataSnapshot.val())
+      snapshot.forEach((dataSnapshot)=>{
         var date = new Date(Number(dataSnapshot.key))
         var month = Number(date.getMonth()) + Number(1)
         if (dataSnapshot.val().name == "bank" && dataSnapshot.val().target == uid) {
@@ -704,7 +696,7 @@ async function userlogs() {
           )
         }
         return false
-      }))
+      })
     })
 }
 
@@ -732,10 +724,10 @@ async function adminlogs() {
     })
 }
 
-function toggledisplay() {
-  (function(style) {
-    style.display = style.display === 'none' ? '' : 'none';
-  })(document.getElementById("historique").style);
+function toggledisplay(id) {
+    (function(style) {
+      style.display = style.display === 'none' ? '' : 'none';
+    })(document.getElementById(id).style);
 }
 
 async function lend() {
@@ -751,6 +743,11 @@ async function lend() {
   var motif = document.getElementById("motif-input").value
 
   //check input values
+  if (/^\d+$/.test(amount) == false) {
+    document.getElementById("amount-error").innerHTML = "Merci d'indiquer une quantitée valid"
+    return
+  }
+  document.getElementById("amount-error").innerHTML = ""
   if (/^\d+$/.test(weeks) == false) {
     document.getElementById("time-error").innerHTML = "Merci d'indiquer une durée valid"
     return
@@ -764,32 +761,96 @@ async function lend() {
 
   var i = weeks/2
   var payments = Math.round(amount * (1 + (i/100))/weeks)
-  console.log(amount, weeks, i, payments)
   if ((weeks - Math.floor(weeks)) != 0 || weeks == 0 || /^\d+$/.test(amount) == false) {
-    document.getElementById("time-error").innerHTML = "Entrez un nombre de semaine valide SVP (nombre pas virgule)"
+    document.getElementById("time-error").innerHTML = "Entrez un nombre de semaine valide SVP (nombre sans virgule)"
     return
   } else {
     document.getElementById("time-error").innerHTML = ""
   }
-  set(ref(db, "users/" + uid + "/lend/" + Date.now()), {
-    amount : amount,
-    payments : payments,
-    weeks_left : weeks,
-    intrest : i
-  })
-  set(ref(db, "users/" + uid + "/bank"), Number(bank) + amount)
   var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
     return snapshot.val().name
   })
-  set(ref(db, "transactions/" + Date.now()), {
+  set(ref(db, "lendRequests/" + Date.now()), {
     name : "bank",
     uid : "bank",
     tuid : uid,
     tname : name,
     motif : motif,
-    amount : amount
+    amount : amount,
+    payments : payments,
+    nb_weeks : weeks,
+    intrest : i
   })
-  document.getElementById("result").innerHTML = "Empreint reussit"
+  document.getElementById("result").innerHTML = "Empreint demandé"
+}
+
+async function acceptLend(lendID) {
+  get(child(ref(db), "lendRequests/" + lendID)).then(async(snapshot)=>{
+    var db = getDatabase()
+    var user = auth.currentUser
+    var uid = user.uid
+    var bank = await get(child(ref(db), "users/" + uid)).then((dataSnapshot)=>{
+      return dataSnapshot.val().bank
+    })
+
+    set(ref(db, "users/" + uid + "/bank"), Number(bank) + snapshot.val().amount)
+    set(ref(db, "users/" + uid + "/lend/" + Date.now()), {
+      amount : snapshot.val().amount,
+      payments : snapshot.val().payments,
+      weeks_left : snapshot.val().nb_weeks,
+      intrest : snapshot.val().intrest
+    })
+
+    set(ref(db, "transactions/" + Date.now()), {
+      name : "bank",
+      uid : "bank",
+      tuid : snapshot.val().tuid,
+      tname : snapshot.val().tname,
+      motif : snapshot.val().motif,
+      amount : snapshot.val().amount
+    })
+    set(ref(db, "lendRequests/" + lendID), null)
+  })
+  adminPage()
+}
+
+async function denyLend(lendID) {
+  set(ref(db, "lendRequests/" + lendID), null)
+  adminPage()
+}
+
+async function showLendRequest() {
+  db = getDatabase()
+  get(child(ref(db), "lendRequests")).then((requests)=>{
+    requests.forEach((requestData)=>{
+      var date = new Date(Number(requestData.key))
+      var month = Number(date.getMonth()) + Number(1)
+      document.getElementById("lendRequests").insertAdjacentHTML("afterbegin", 
+          `<div class="transaction-data">
+              <h3 style="margin-bottom: 0px;">Sortant</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Author : ` + requestData.val().tname + `</p>
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + requestData.val().amount + `ß</p>
+              </div>
+              <p style="margin-top: 0; margin-bottom: 0px;">Motif : ` + requestData.val().motif + `</p>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 0px;">Durée : ` + requestData.val().nb_weeks + ` (payments : `+ requestData.val().payments + `ß)</p>
+              </div>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="accept-` + requestData.key + `"><p>Accepter</p></button>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="deny-` + requestData.key + `"><p>Refuser</p></button>
+              </div>
+            </div>`
+          )
+      document.getElementById("accept-"+requestData.key).addEventListener("click", () => {
+        acceptLend(requestData.key)
+      })
+      document.getElementById("deny-"+requestData.key).addEventListener("click", () => {
+        denyLend(requestData.key)
+      })
+    })
+  })
+
 }
 
 async function newFacture() {
@@ -850,7 +911,6 @@ async function factureList() {
   get(child(ref(db), "factures")).then((snapshot)=>{
     snapshot.forEach((dataSnapshot)=>{
       var date = new Date(Number(dataSnapshot.key))
-      console.log(date.getTime())
       var today = new Date()
       var daysSince = Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24))
       if (dataSnapshot.val().uid == uid) {
@@ -1088,30 +1148,24 @@ async function remind(facture) {
   get(child(ref(db), "factures/" + facture)).then(async (snapshot)=>{
     if (snapshot.val().rappel1 == null) {
       var date = new Date(snapshot.key)
-      console.log(Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)))
       if (Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)) >= 3) {
         await set(ref(db, "factures/" + facture + "/rappel1"), Date.now())
-        console.log("this")
       } else {
         alert("Il faut attendre 3j pour faire le premier rappel")
         return
       }
     } else if (snapshot.val().rappel2 == null) {
       var date = new Date(snapshot.val().rappel2)
-      console.log(Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)))
       if (Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)) >= 3) {
         await set(ref(db, "factures/" + facture + "/rappel2"), Date.now())
-        console.log("that")
       } else {
         alert("Il faut attendre 3j entre les rappels")
         return
       }
     } else if (snapshot.val().rappel3 == null) {
       var date = new Date(snapshot.val().rappel2)
-      console.log(Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)))
       if (Math.floor((today.getTime() - date.getTime()) / (1000 * 3600 * 24)) >= 3) {
         await set(ref(db, "factures/" + facture + "/rappel3"), Date.now())
-        console.log("or even this")
       } else {
         alert("Il faut attendre 3j entre les rappels")
         return
@@ -1157,9 +1211,9 @@ async function pay(facture) {
     uid : uid,
     tuid : benefUid,
     motif : "payment de facture (=> Id facture : " + facture + ")", 
-    amount : fAmount
+    amount : fAmount,
   })
-  await set(ref(db, "transactions/" + Date.now() + "(tax)"), {
+  await set(ref(db, "transactions/" + Date.now()), {
     name : tname,
     tname : "FDO",
     uid : benefUid,
@@ -1178,6 +1232,7 @@ async function pay(facture) {
         tname : snapshot.val().tname,
         motif : snapshot.val().motif,
         amount : snapshot.val().amount,
+        payTime : Date.now(),
         rappel1 : snapshot.val().rappel1,
         rappel2 : snapshot.val().rappel2,
         rappel3 : snapshot.val().rappel3
@@ -1190,6 +1245,7 @@ async function pay(facture) {
         tname : snapshot.val().tname,
         motif : snapshot.val().motif,
         amount : snapshot.val().amount,
+        payTime : Date.now(),
         rappel1 : snapshot.val().rappel1,
         rappel2 : snapshot.val().rappel2
       })
@@ -1201,6 +1257,7 @@ async function pay(facture) {
         tname : snapshot.val().tname,
         motif : snapshot.val().motif,
         amount : snapshot.val().amount,
+        payTime : Date.now(),
         rappel1 : snapshot.val().rappel1
       })
     } else {
@@ -1210,7 +1267,8 @@ async function pay(facture) {
         name : snapshot.val().name,
         tname : snapshot.val().tname,
         motif : snapshot.val().motif,
-        amount : snapshot.val().amount
+        amount : snapshot.val().amount,
+        payTime : Date.now(),
       })
     }
   })
@@ -1233,7 +1291,6 @@ async function update() {
               var bank = Number(dataSnapshot.val().bank)
               var verified = dataSnapshot.val().verified
               var dbref = ref(db, "users/" + dataSnapshot.key + "/bank")
-              console.log(role, bank, verified,)
               
               if (verified == true) {
                 get(child(ref(db),"users/FDO")).then((fdoSnapshot)=>{
