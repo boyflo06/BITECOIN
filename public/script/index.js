@@ -1496,7 +1496,7 @@ async function update() {
               })
 
               //impots sur la fortune
-              if (dataSnapshot.val().bank > 20000) {
+              if (dataSnapshot.val().bank > 10000000) {
                 get(child(ref(db), "users/FDO")).then((fdoSnapshot)=>{
                   var fdoBank = fdoSnapshot.val().bank
                   set(ref(db, "users/FDO/bank"), fdoBank + (dataSnapshot.val().bank)*0.05)
