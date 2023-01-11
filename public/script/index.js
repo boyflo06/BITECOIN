@@ -72,8 +72,8 @@ function signupPage () {
       +'<input type="password" placeholder="Confirmez le mot de passe" style="margin-top: 10px;" id="pswrd-confirm-input"><br>'
       +'<p style="font-size: 12px; color: red;margin-top: 0;" id="value-error"></p>'
       +'<button style="margin-top: 20px;" id="signup-button">S'+"'"+'enregistrer</button><br>'
-      +'<a id="login-button">Vous avez deja un compte ? Connectez-vous</a><br>'
-      +'<a id="type-link">optez pour un compte entreprise</a>'
+      +'<a id="login-button" style="margin-bottom: 20px;">Vous avez deja un compte ? Connectez-vous</a><p></p>'
+      +'<a id="type-link">Plutôt pro ? Optez pour un compte entreprise</a>'
     +'</section>'
   )
   document.getElementById("signup-button").addEventListener("click", register)
@@ -84,18 +84,18 @@ function eSignupPage() {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
     `<section id="login">
-    <h1>Register (Entreprise)</h1>
-    <input type="text" placeholder="Name de l'Entreprise" id="name-input"><br>
+    <h1>S'enregistrer (Entreprise)</h1>
+    <input type="text" placeholder="Nom de l'Entreprise" id="name-input"><br>
     <input type="email" placeholder="E-mail" id="email-input" style="margin-top: 20px;"><br>
     <p style="font-size: 12px; color: red;margin-top: 0;" id="email-error"></p>
-    <input type="password" placeholder="Password" id="pswrd-input" style="margin-top: 10px;"><br>
+    <input type="password" placeholder="Mot de passe" id="pswrd-input" style="margin-top: 10px;"><br>
     <p style="font-size: 12px; color: red;margin-top: 0;" id="pswrd-error"></p>
-    <input type="password" placeholder="Confirm Password" style="margin-top: 10px;" id="pswrd-confirm-input"><br>
+    <input type="password" placeholder="Confirmez le mot de passe" style="margin-top: 10px;" id="pswrd-confirm-input"><br>
     <p style="font-size: 12px; color: red;margin-top: 0;" id="value-error"></p>
     <button style="margin-top: 20px;" id="signup-button">Sign-Up</button><br>
-    <a id="login-button">Already have an account : Sign-In</a>
+    <a id="login-button">Vous avez deja un compte ? Connectez-vous</a>
     <p id="signin-button"></p>
-    <a id="type-link">optez pour un compte personnel</a>
+    <a id="type-link" style="margin-top: 20px;">Plutôt solo ? Optez pour un compte personnel</a>
     </section>`
   )
   document.getElementById("signup-button").addEventListener("click", registerEntreprise)
@@ -128,7 +128,8 @@ function userPage() {
       +'<p id="revenue" style="margin-top: 0;"></p>'
       +'<div id="links">'
         +'<div style="margin-bottom: 5px;"><a id="transfer-button"><button><p style="margin: 0;">Transferer</p></button></a></div><br>'
-        +'<div style="margin-bottom: 5px"><a id="lend-button"><button><p style="margin: 0;">Empreinter</p></button></a></div><br>'
+        +'<div style="margin-bottom: 0px"><a id="lend-button"><button disabled><p style="margin: 0;">Empreinter</p></button></a></div>'
+        +'<p style="margin-top: 0; font-size: 15px;">Cette fonctionalité est désactivée pour la sortie de l' + "'" + 'app</p>'
         +'<div style="margin-bottom: 5px;"><a id="factures-button"><button><p style="margin: 0;">Factures</p></button></a></div><br>'
         +'<div style="margin-bottom: 5px"><a id="userlogs-button"><button><p style="margin: 0;">Historique</p></button></a></div><br>'
       +'</div>'
@@ -173,7 +174,7 @@ function userPage() {
           
           document.getElementById("transfer-button").addEventListener("click", transferPage)
           document.getElementById("userlogs-button").addEventListener("click", userlogsPage)
-          document.getElementById("lend-button").addEventListener("click", lendPage)
+          //document.getElementById("lend-button").addEventListener("click", lendPage)
           document.getElementById("factures-button").addEventListener("click", facturePage)
         } else {
           document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
@@ -477,6 +478,7 @@ async function register () {
       verified : false,
       lend : "",
       admin : false,
+      entreprise : false,
       last_login : Date.now()
     });
 
@@ -644,11 +646,11 @@ async function transfer() {
     return
   }
 
-  var fdoBank = await get(child(ref(db), "users/FDO")).then((snapshot)=>{ return snapshot.val().bank })
+  var fdoBank = await get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((snapshot)=>{ return snapshot.val().bank })
   //Transfer amount
   await set(ref(db, "users/" + uid + "/bank"), bank-amount)
   await set(ref(db, "users/" + id + "/bank"), Number(tbank)+(Number(amount)*0.85))
-  await set(ref(db, "users/FDO/bank"), Number(fdoBank)+(Number(amount)*0.15))
+  await set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), Number(fdoBank)+(Number(amount)*0.15))
 
   //Log transfer to database
   var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
@@ -668,7 +670,7 @@ async function transfer() {
   })
   await set(ref(db, "transactions/" + Date.now()), {
     uid : id,
-    tuid : "FDO",
+    tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
     name : tname,
     tname : "FDO",
     motif : "tax de transaction",
@@ -689,11 +691,11 @@ async function userlogs() {
       snapshot.forEach((dataSnapshot)=>{
         var date = new Date(Number(dataSnapshot.key))
         var month = Number(date.getMonth()) + Number(1)
-        if (dataSnapshot.val().name == "bank" && dataSnapshot.val().target == uid) {
+        if (dataSnapshot.val().name == "bank" && dataSnapshot.val().tname == uid) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p><p style='margin-top: 0;'>Motif : " + dataSnapshot.val().motif + "</p></div>"
           )
-        } else if (dataSnapshot.val().target == "bank" && dataSnapshot.val().name == uid) {
+        } else if (dataSnapshot.val().tname == "bank" && dataSnapshot.val().name == uid) {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>Refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().tname + "</h2><p style='margin: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p><p style='margin-top: 0;'>Motif : " + dataSnapshot.val().motif + "</p></div>"
           )
@@ -722,7 +724,7 @@ async function adminlogs() {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().tname + " lended " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().name + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
-        } else if (dataSnapshot.val().target == "bank") {
+        } else if (dataSnapshot.val().tname == "bank") {
           document.getElementById("under-me").insertAdjacentHTML("afterend", 
             "<div class='transaction-data'><h2 style='margin-bottom: 0;'>" + dataSnapshot.val().name + " refunded " + dataSnapshot.val().amount + " ß to the " + dataSnapshot.val().tname + "</h2><p style='margin-top: 0;'> on the " + date.getDate() + "-" + month + "-" + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</p></div>"
           )
@@ -933,7 +935,7 @@ async function factureList() {
           `<div class="transaction-data">
               <h3 style="margin-bottom: 0px;">Sortant</h3>
               <div style="display: flex; justify-content: center; margin: 0px 20px;">
-                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Destinataire : ` + name + `</p>
                 <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß ttc</p>
               </div>
               <p style="margin-top: 0; margin-bottom: 0px;">Motif : ` + dataSnapshot.val().motif + `</p>
@@ -958,7 +960,7 @@ async function factureList() {
           `<div class="transaction-data">
               <h3 style="margin-bottom: 0px;">Sortant</h3>
               <div style="display: flex; justify-content: center; margin: 0px 20px;">
-                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Destinataire : ` + name + `</p>
                 <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß ttc</p>
               </div>
               <p style="margin-top: 0; margin-bottom: 0px;">Motif : ` + dataSnapshot.val().motif + `</p>
@@ -987,7 +989,7 @@ async function factureList() {
           `<div class="transaction-data">
               <h3 style="margin-bottom: 0px;">Sortant</h3>
               <div style="display: flex; justify-content: center; margin: 0px 20px;">
-                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Destinataire : ` + name + `</p>
                 <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß ttc</p>
               </div>
               <p style="margin-top: 0; margin-bottom: 0px;">Motif : ` + dataSnapshot.val().motif + `</p>
@@ -1014,7 +1016,7 @@ async function factureList() {
           `<div class="transaction-data">
               <h3 style="margin-bottom: 0px;">Sortant</h3>
               <div style="display: flex; justify-content: center; margin: 0px 20px;">
-                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Target : ` + name + `</p>
+                <p style="margin-top: 0; margin-right: 20px; margin-bottom: 0px;">Destinataire : ` + name + `</p>
                 <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + dataSnapshot.val().amount + `ß ttc</p>
               </div>
               <p style="margin-top: 0; margin-bottom: 0px;">Motif : ` + dataSnapshot.val().motif + `</p>
@@ -1228,7 +1230,7 @@ async function pay(facture) {
     name : tname,
     tname : "FDO",
     uid : benefUid,
-    tuid : "FDO",
+    tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
     motif : "Taxe entreprise (=> Id facture : " + facture + ")",
     amount : fAmount*0.20
   })
@@ -1304,15 +1306,15 @@ async function update() {
               var dbref = ref(db, "users/" + dataSnapshot.key + "/bank")
               
               if (verified == true) {
-                get(child(ref(db),"users/FDO")).then((fdoSnapshot)=>{
+                get(child(ref(db),"users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((fdoSnapshot)=>{
                   var fdoBank = fdoSnapshot.val().bank
                     if (role == "sans-emploie") {
                         set(dbref, bank + (800*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 800*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 800*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 800
@@ -1321,18 +1323,18 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 800*0.20
                         })
                         bank = bank + 800
                     } else if (role == "membre") {
                         set(dbref, bank + (1200*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 1200*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 1200*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 1200
@@ -1341,18 +1343,18 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 1200*0.20
                         })
                         bank = bank + 1200
                     } else if (role == "avocat" || role == "gestionnaire de propriété") {
                         set(dbref, bank + (1500*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 1500*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 1500*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 1500
@@ -1361,18 +1363,18 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 1500*0.20
                         })
                         bank = bank + 1500
                     } else if (role == "conseiller") {
                         set(dbref, bank + (2000*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 2000*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 2000*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 2000
@@ -1381,18 +1383,18 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 2000*0.20
                         })
                         bank = bank + 2000
                     } else if (role == "ministre" || role == "magistrat" || role == "premier ministre") {
                         set(dbref, bank + (2500*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 2500*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 2500*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 2500
@@ -1401,18 +1403,18 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 2500*0.20
                         })
                         bank = bank + 2500
                     } else if (role == "ministre des finances") {
                         set(dbref, bank + (3000*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 3000*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 3000*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 3000
@@ -1421,18 +1423,18 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 3000*0.20
                         })
                         bank = bank + 3000
                     } else if (role == "administrateur delegay") {
                         set(dbref, bank + (3500*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 3500*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 3500*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 3500
@@ -1441,18 +1443,18 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 3500*0.20
                         })
                         bank = bank + 3500
                     } else if (role == "administrateur supreme") {
                         set(dbref, bank + (4750*0.80))
-                        set(ref(db, "users/FDO/bank"), fdoBank + 4750*0.20)
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 4750*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
-                            uid : "FDO",
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
                             amount : 4750
@@ -1461,7 +1463,7 @@ async function update() {
                           name : name,
                           tname : "FDO",
                           uid : dataSnapshot.key,
-                          tuid : "FDO",
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
                           amount : 4750*0.20
                         })
@@ -1473,13 +1475,13 @@ async function update() {
 
               //prêts
               dataSnapshot.forEach((snapshotDataSnapshot)=>{
-                  get(child(ref(db), "users/FDO")).then((fdoSnapshot)=>{
+                  get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((fdoSnapshot)=>{
                     if (snapshotDataSnapshot.key == "lend") {
                         snapshotDataSnapshot.forEach((dataSnapshotDataSnapshot)=>{
                             var payment = Number(dataSnapshotDataSnapshot.val().payments)
                             var weeks_left = Number(dataSnapshotDataSnapshot.val().weeks_left) - 1
                             set(ref(db, "users/" + dataSnapshot.key + "/bank"), bank - payment)
-                            set(ref(db, "users/FDO/bank"), fdoSnapshot.val().bank + (payment*0.20))
+                            set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoSnapshot.val().bank + (payment*0.20))
                             if (weeks_left == 0) {
                                 set(ref(db, "users/" + dataSnapshot.key + "/lend/" + dataSnapshotDataSnapshot.key), null)
                             } else {
@@ -1487,7 +1489,7 @@ async function update() {
                             }
                             set(ref(db, "transactions/" + Date.now()), {
                                 name : name,
-                                target : "bank",
+                                tname : "bank",
                                 uid : dataSnapshot.key,
                                 tuid : "bank",
                                 motif : "remboursement de pret",
@@ -1497,7 +1499,7 @@ async function update() {
                               name : "bank",
                               tname : "FDO",
                               uid : "bank",
-                              tuid : "FDO",
+                              tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                               motif : "impot entrprise (=> remboursement pret)",
                               amount : payment*0.20
                             })
@@ -1508,15 +1510,15 @@ async function update() {
 
               //impots sur la fortune
               if (dataSnapshot.val().bank > 10000000) {
-                get(child(ref(db), "users/FDO")).then((fdoSnapshot)=>{
+                get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((fdoSnapshot)=>{
                   var fdoBank = fdoSnapshot.val().bank
-                  set(ref(db, "users/FDO/bank"), fdoBank + (dataSnapshot.val().bank)*0.05)
+                  set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + (dataSnapshot.val().bank)*0.05)
                   set(ref(db, "users/" + dataSnapshot.key + "/bank"), dataSnapshot.val().bank - (dataSnapshot.val().bank*0.05))
                   set(ref(db, "transactions/" + Date.now()), {
                     name : name,
-                    target : "FDO",
+                    tname : "FDO",
                     uid : dataSnapshot.key,
-                    tuid : "FDO",
+                    tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                     motif : "impot sur le salaire",
                     amount : (dataSnapshot.val().bank*0.05)
                 })
