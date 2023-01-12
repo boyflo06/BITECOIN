@@ -28,7 +28,7 @@ var db = getDatabase();
 indexPage();
 document.getElementById("header-text").addEventListener("click", indexPage)
 
-const currentVersion = "1.0.0"
+const currentVersion = "1.0.1"
 
 get(child(ref(db), "appInfo")).then((snapshot)=>{
   if (currentVersion != snapshot.val().version){
@@ -162,8 +162,12 @@ function userPage() {
             revenue.innerHTML = "3000 ß/week"
           } else if (userrole == "administrateur delegay") {
             revenue.innerHTML = "3500 ß/week"
+          } else if (userrole == "avocat + premier ministre") {
+            revenue.innerHTML = "4000 ß/week"
           } else if (userrole == "administrateur supreme") {
             revenue.innerHTML = "4750 ß/week"
+          } else if (userrole == "administrateur supreme + magistrat") {
+            revenue.innerHTML = "7250 ß/week"
           }
           if (snapshot.val().admin == true) {
             document.getElementById("logout").insertAdjacentHTML("beforebegin", 
@@ -1468,7 +1472,47 @@ async function update() {
                           amount : 4750*0.20
                         })
                         bank = bank + 4750
-                    }
+                    } else if (role == "avocat + premier ministre") {
+                      set(dbref, bank + (4000*0.80))
+                      set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 4000*0.20)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          tname : name,
+                          uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                          tuid : dataSnapshot.key,
+                          motif : "salaire",
+                          amount : 4000
+                      })
+                      set(ref(db, "transactions/" + Date.now()), {
+                        name : name,
+                        tname : "FDO",
+                        uid : dataSnapshot.key,
+                        tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                        motif : "impot salaire",
+                        amount : 4000*0.20
+                      })
+                      bank = bank + 4000
+                  } else if (role == "administrateur supreme + magistrat") {
+                    set(dbref, bank + (7250*0.80))
+                    set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 7250*0.20)
+                    set(ref(db, "transactions/" + Date.now()), {
+                        name : "FDO",
+                        tname : name,
+                        uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                        tuid : dataSnapshot.key,
+                        motif : "salaire",
+                        amount : 7250
+                    })
+                    set(ref(db, "transactions/" + Date.now()), {
+                      name : name,
+                      tname : "FDO",
+                      uid : dataSnapshot.key,
+                      tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                      motif : "impot salaire",
+                      amount : 7250*0.20
+                    })
+                    bank = bank + 7250
+                }
                 }) 
 
               }
