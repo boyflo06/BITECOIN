@@ -165,7 +165,7 @@ function userPage() {
             revenue.innerHTML = "2000 ß/week"
           } else if (userrole == "ministre" || userrole == "magistrat" || userrole == "premier ministre") {
             revenue.innerHTML = "2500 ß/week"
-          } else if (userrole == "ministre des finances") {
+          } else if (userrole == "ministre des finances + horateur") {
             revenue.innerHTML = "3000 ß/week"
           } else if (userrole == "administrateur delegay") {
             revenue.innerHTML = "3500 ß/week"
