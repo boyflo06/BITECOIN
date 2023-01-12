@@ -31,9 +31,15 @@ document.getElementById("header-text").addEventListener("click", indexPage)
 const currentVersion = "1.0.1"
 
 get(child(ref(db), "appInfo")).then((snapshot)=>{
-  if (currentVersion != snapshot.val().version){
+  if (snapshot.val().version == "maintenance") {
     document.querySelector("header").insertAdjacentHTML("afterend",
-      `<h1 style="color: red;" id="alert">Vous utilisez une version obselete. Merci de mettre a jour l'app en la reinstallant</h1>`
+      `<h1 style="color: orange;" id="alert">L'app est en cours de maintenance. Merci de revenir plus tard</h1>`
+    )
+    document.querySelector("section").remove()
+  } else if (currentVersion != snapshot.val().version){
+    document.querySelector("header").insertAdjacentHTML("afterend",
+      `<h1 style="color: red;" id="alert">Vous utilisez une version obselete. Merci de mettre a jour l'app en la reinstallant</h1>
+      <h1 style="color: red;" id="alert">(Version actuelle : v` + snapshot.val().version + ` ; Version intallé : v` + currentVersion + `)</h1>`
     )
     document.querySelector("section").remove()
   }
@@ -211,7 +217,8 @@ function userPage() {
 function transferPage() {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
-    '<section id="info">'
+    '<section id="login">'
+      +'<a id="back-button">Retour</a>'
       +'<h1>Transférer</h1>'
       +'<p id="bank" style="margin-bottom: 0;"></p>'
       +'<input placeholder="montant" style="margin-top: 20px;" id="amount-input"><br>'
@@ -230,7 +237,6 @@ function transferPage() {
       +'<button style="margin-top: 20px;" id="transfer-button"><p style="margin: 0px;">Envoyer</p></button><br>'
       +'<p style="font-size: 14px;">Les tax de virement sont a 15%</p>'
       +'<p style="color: green;" id="result"></p>'
-      +'<a id="back-button">Retour</a>'
     +'</section>'
   )
   onAuthStateChanged(auth, (user) => {
@@ -323,7 +329,8 @@ function adminPage() {
 function lendPage() {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
-    '<section id="info">'
+    '<section id="login">'
+      +'<a id="back-button">Retour</a>'
       +'<h1>Empreinter</h1>'
       +'<p id="bank" style="margin-bottom: 0;"></p>'
       +'<input placeholder="quantité" style="margin-top: 20px;" id="amount-input"><br>'
@@ -337,7 +344,6 @@ function lendPage() {
       +'<p style="font-size: 14px;">Si vous ne savez pas repayer la banque, votre solde sera negatif</p>'
       +'<button style="margin-top: 20px;" id="lend-button"><p style="margin: 0px;">Envoyer</p></button><br>'
       +'<p style="color: green;" id="result"></p>'
-      +'<a id="back-button">Retour</a>'
     +'</section>'
   )
   onAuthStateChanged(auth, (user) => {
@@ -353,7 +359,7 @@ function lendPage() {
 function facturePage() {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
-    `<section id="info">
+    `<section id="login">
     <a id="back-button">Retour</a>
     <h1>Liste de factures</h1>
     <p id="bank" style="margin-bottom: 15px;">test</p>
@@ -384,7 +390,7 @@ function facturePage() {
 function newFacturePage() {
   document.querySelector("section").remove()
   document.querySelector("header").insertAdjacentHTML("afterend", 
-    `<section id="info">
+    `<section id="login">
     <h1>Créer une facture</h1>
     <p style="margin: 0; font-size: 14px; color:red;" id="id-error"></p>
     <select id="ids" style="width: 16.5pc; height: 3.5pc;">
@@ -616,6 +622,9 @@ async function transfer() {
   if (/^\d+$/.test(amount) == false) {
     document.getElementById("amount-error").innerHTML = "Veuillez entrer un nombre (sans symbols)"
     return
+  } else if (amount < 5) {
+    document.getElementById("amount-error").innerHTML = "Merci d'indiquer 5ß ou plus"
+    return
   }
   document.getElementById("amount-error").innerHTML = ""
   if (id == "none") {
@@ -763,6 +772,9 @@ async function lend() {
   if (/^\d+$/.test(amount) == false) {
     document.getElementById("amount-error").innerHTML = "Merci d'indiquer une quantitée valid"
     return
+  } else if (amount < 5) {
+    document.getElementById("amount-error").innerHTML = "Merci d'indiquer 5ß ou plus"
+    return
   }
   document.getElementById("amount-error").innerHTML = ""
   if (/^\d+$/.test(weeks) == false) {
@@ -888,6 +900,9 @@ async function newFacture() {
   document.getElementById("id-error").innerHTML = ""
   if (/^\d+$/.test(amount) == false) {
     document.getElementById("amount-error").innerHTML = "Veuillez entrer un nombre (sans symbols)"
+    return
+  } else if (amount < 5) {
+    document.getElementById("amount-error").innerHTML = "Merci d'indiquer 5ß ou plus"
     return
   }
   document.getElementById("amount-error").innerHTML = ""
