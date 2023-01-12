@@ -25,8 +25,6 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
-indexPage();
-document.getElementById("header-text").addEventListener("click", indexPage)
 
 const currentVersion = "1.0.1"
 
@@ -42,6 +40,9 @@ get(child(ref(db), "appInfo")).then((snapshot)=>{
       <h1 style="color: red;" id="alert">(Version actuelle : v` + snapshot.val().version + ` ; Version intallé : v` + currentVersion + `)</h1>`
     )
     document.querySelector("section").remove()
+  } else {
+    indexPage();
+    document.getElementById("header-text").addEventListener("click", indexPage)
   }
 })
 
