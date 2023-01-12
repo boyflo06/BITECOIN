@@ -171,6 +171,8 @@ function userPage() {
             revenue.innerHTML = "3500 ß/week"
           } else if (userrole == "avocat + premier ministre") {
             revenue.innerHTML = "4000 ß/week"
+          } else if (userrole == "avocat + conseiller") {
+            revenue.innerHTML = "3500 ß/week"
           } else if (userrole == "administrateur supreme") {
             revenue.innerHTML = "4750 ß/week"
           } else if (userrole == "administrateur supreme + magistrat") {
@@ -1428,16 +1430,16 @@ async function update() {
                           amount : 2500*0.20
                         })
                         bank = bank + 2500
-                    } else if (role == "ministre des finances") {
-                        set(dbref, bank + (3000*0.80))
-                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 3000*0.20)
+                    } else if (role == "ministre des finances + horateur") {
+                        set(dbref, bank + (3150*0.80))
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 3150*0.20)
                         set(ref(db, "transactions/" + Date.now()), {
                             name : "FDO",
                             tname : name,
                             uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                             tuid : dataSnapshot.key,
                             motif : "salaire",
-                            amount : 3000
+                            amount : 3150
                         })
                         set(ref(db, "transactions/" + Date.now()), {
                           name : name,
@@ -1445,9 +1447,9 @@ async function update() {
                           uid : dataSnapshot.key,
                           tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
                           motif : "impot salaire",
-                          amount : 3000*0.20
+                          amount : 3150*0.20
                         })
-                        bank = bank + 3000
+                        bank = bank + 3150
                     } else if (role == "administrateur delegay") {
                         set(dbref, bank + (3500*0.80))
                         set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 3500*0.20)
@@ -1488,7 +1490,27 @@ async function update() {
                           amount : 4750*0.20
                         })
                         bank = bank + 4750
-                    } else if (role == "avocat + premier ministre") {
+                    } else if (role == "avocat + conseiller") {
+                      set(dbref, bank + (3500*0.80))
+                      set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 3500*0.20)
+                      set(ref(db, "transactions/" + Date.now()), {
+                          name : "FDO",
+                          tname : name,
+                          uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                          tuid : dataSnapshot.key,
+                          motif : "salaire",
+                          amount : 3500
+                      })
+                      set(ref(db, "transactions/" + Date.now()), {
+                        name : name,
+                        tname : "FDO",
+                        uid : dataSnapshot.key,
+                        tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                        motif : "impot salaire",
+                        amount : 3500*0.20
+                      })
+                      bank = bank + 3500
+                    }  else if (role == "avocat + premier ministre") {
                       set(dbref, bank + (4000*0.80))
                       set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 4000*0.20)
                       set(ref(db, "transactions/" + Date.now()), {
@@ -1508,27 +1530,27 @@ async function update() {
                         amount : 4000*0.20
                       })
                       bank = bank + 4000
-                  } else if (role == "administrateur supreme + magistrat") {
-                    set(dbref, bank + (7250*0.80))
-                    set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 7250*0.20)
-                    set(ref(db, "transactions/" + Date.now()), {
-                        name : "FDO",
-                        tname : name,
-                        uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-                        tuid : dataSnapshot.key,
-                        motif : "salaire",
-                        amount : 7250
-                    })
-                    set(ref(db, "transactions/" + Date.now()), {
-                      name : name,
-                      tname : "FDO",
-                      uid : dataSnapshot.key,
-                      tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-                      motif : "impot salaire",
-                      amount : 7250*0.20
-                    })
-                    bank = bank + 7250
-                }
+                    } else if (role == "administrateur supreme + magistrat") {
+                        set(dbref, bank + (7250*0.80))
+                        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 7250*0.20)
+                        set(ref(db, "transactions/" + Date.now()), {
+                            name : "FDO",
+                            tname : name,
+                            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                            tuid : dataSnapshot.key,
+                            motif : "salaire",
+                            amount : 7250
+                        })
+                        set(ref(db, "transactions/" + Date.now()), {
+                          name : name,
+                          tname : "FDO",
+                          uid : dataSnapshot.key,
+                          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                          motif : "impot salaire",
+                          amount : 7250*0.20
+                        })
+                        bank = bank + 7250
+                    }
                 }) 
 
               }
