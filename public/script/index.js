@@ -989,7 +989,7 @@ async function factureList() {
                   <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
                   <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + daysSince + `j</p>
                 </div>
-                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rapeler</p></button>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rappeler</p></button>
               </div>
             </div>`
           )
@@ -1022,7 +1022,7 @@ async function factureList() {
                   <p style="font-size: 16px;" style="margin-top: 0; margin-bottom: 0;">Dernier Rappel : ` + daysSinceLastRemind + `j</p>
                   <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + daysSince + `j</p>
                 </div>
-                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rapeler</p></button>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rappeler</p></button>
               </div>
             </div>`
           )
@@ -1052,7 +1052,7 @@ async function factureList() {
                 <div>
                   <p style="font-size: 16px;" style="margin-top: 0;">Creation :` + daysSince + `j</p>
                 </div>
-                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rapeler</p></button>
+                <button style="width: 5pc; display: flex; align-items: center; justify-content: center; margin-left: 20px;" id="remind-` + dataSnapshot.key + `"><p>Rappeler</p></button>
               </div>
             </div>`
           )
