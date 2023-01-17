@@ -81,3 +81,8 @@ a {
     padding-right: 10px;
 }
 
+button:disabled {
+    color: black;
+    background-color: lightgrey;
+}
+
