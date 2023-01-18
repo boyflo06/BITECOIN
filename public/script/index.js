@@ -139,6 +139,7 @@ function userPage() {
         +'<p style="margin-top: 0; font-size: 15px;">Cette fonctionalité est désactivée pour la sortie de l' + "'" + 'app</p>'
         +'<div style="margin-bottom: 5px;"><a id="factures-button"><button><p style="margin: 0;">Factures</p></button></a></div><br>'
         +'<div style="margin-bottom: 5px"><a id="userlogs-button"><button><p style="margin: 0;">Historique</p></button></a></div><br>'
+        +'<div style="margin-bottom: 5px"><a id="options-button"><button><p style="margin: 0;">Options</p></button></a></div><br>'
       +'</div>'
       +'<a id="logout">Log-Out</a>'
     +'</section>'
@@ -189,6 +190,7 @@ function userPage() {
           document.getElementById("userlogs-button").addEventListener("click", userlogsPage)
           //document.getElementById("lend-button").addEventListener("click", lendPage)
           document.getElementById("factures-button").addEventListener("click", facturePage)
+          document.getElementById("options-button").addEventListener("click", optionsPage)
         } else {
           document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
           document.getElementById("id").innerHTML = "ID : " + uid
@@ -198,10 +200,12 @@ function userPage() {
             "<div style='margin-bottom: 5px;'><a id='transfer-button'><button><p style='margin: 0;'>Transferer</p></button></a></div><br>" +
             "<div style='margin-bottom: 5px;'><a id='factures-button'><button><p style='margin: 0;'>Factures</p></button></a></div><br>" +
             "<div style='margin-bottom: 5px;'><a id='userlogs-button'><button><p style='margin: 0;'>Historique</p></button></a></div><br>"
+            +'<div style="margin-bottom: 5px"><a id="options-button"><button><p style="margin: 0;">Options</p></button></a></div><br>'
           )
           document.getElementById("transfer-button").addEventListener("click", transferPage)
           document.getElementById("userlogs-button").addEventListener("click", userlogsPage)
           document.getElementById("factures-button").addEventListener("click", facturePage)
+          document.getElementById("options-button").addEventListener("click", optionsPage)
         }
         if (snapshot.val().verified == false) {
           document.getElementById("name").insertAdjacentHTML("beforebegin", 
@@ -440,6 +444,37 @@ function newFacturePage() {
       })
       document.getElementById("back-button").addEventListener("click", facturePage)
       document.getElementById("creer").addEventListener("click", newFacture)
+    } else {
+      indexPage()
+    }
+  })
+}
+function optionsPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend",
+  `<section id="login">
+    <a id="back-button">Retour</a>
+    <h1>Options du compte</h1>
+    <p style="margin-bottom: 5px;">Changer le nom</p>
+    <input id="name-input" placeholder="Nouveau Nom"><br>
+    <p style="margin: 0; font-size: 14px; color:red;" id="name-error"></p>
+    <p id="price" style="margin: 5px; font-size: 16px;"></p>
+    <button style="margin-top: 5px;">Changer</button>
+    <p>C'est tout, pour le moment</p>
+  </section>`
+  )
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      get(child(ref(db), "users/" + uid + "/changedName")).then((snapshot)=>{
+        if (snapshot.exists() == true) {
+          document.getElementById("price").innerHTML = "Prix = 1000 ß"
+        } else {
+          document.getElementById("price").innerHTML = "Prix = Gratuit (Offre de premier changement)"
+        }
+      })
+      document.getElementById("back-button").addEventListener("click", userPage)
     } else {
       indexPage()
     }
@@ -686,7 +721,7 @@ async function transfer() {
   })
 
   //Done
-  document.getElementById("result").innerHTML = "Transfère réussit!"
+  userPage()
 }
 
 async function userlogs() {
@@ -1292,6 +1327,62 @@ async function pay(facture) {
   await set(ref(db, "factures/" + facture), null)
 
   facturePage()
+}
+
+async function changeName() {
+  var db = getDatabase()
+  var user = auth.currentUser
+  var uid = user.uid
+
+  name = document.getElementById("name-input").value
+
+  //verify if something is written
+  if (name == "") {
+    document.getElementById("name-error").innerHTML = "Merci d'indiquer quelque chose"
+    return
+  } else {
+    document.getElementById("name-error").innerHTML = ""
+  }
+
+  //verify if there is enough money on account
+  var i = 0
+  get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+    if (snapshot.val().changedName != null) {
+      if (snapshot.val().bank < 1000) {
+        i = 1
+      }
+    }
+  })
+  if (i == 1) {
+    document.getElementById("name-error").innerHTML = "Solde insuffisant"
+    return
+  } else {
+    document.getElementById("name-error").innerHTML = ""
+  }
+
+  //change name and remove money
+  get(child(ref(db), "users/" + uid)).then(async(snapshot)=>{
+    if (snapshot.val().changedName != null) {
+      //transfer money to fdo
+      var bank = snapshot.val().bank
+      set(ref(db, "users/" + uid + "/bank"), bank - 1000)
+      var fdoBank = get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank")).then(async(fdoSnapshot)=>{ return fdoSnapshot.val()})
+      set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + 1000)
+      //log transaction
+      set(ref(db, "transactions/" + Date.now()), {
+      name : snapshot.val().name,
+      tname : "FDO",
+      uid : uid,
+      tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+      motif : "changement de nom (=> " + name + ")",
+      amount : 1000
+      })
+    }
+    //change name
+    set(ref(db, "users/" + uid + "changedName"), true)
+    set(ref(db, "users/" + uid + "/name" ), name)
+  })
+  userPage()
 }
 
 async function update() {
