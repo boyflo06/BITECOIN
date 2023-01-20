@@ -59,10 +59,8 @@ function indexPage() {
         + "<a id='login-button'>Vous avez deja un compte ? Connectez-vous</a>"
     + "</section>"
   )
-  document.getElementById("register-button").addEventListener("click", signupPage
-  )
-  document.getElementById("login-button").addEventListener("click", loginPage
-  )
+  document.getElementById("register-button").addEventListener("click", signupPage)
+  document.getElementById("login-button").addEventListener("click", loginPage)
 }
 
 
@@ -123,6 +121,12 @@ function loginPage() {
   )
   document.getElementById("signin-button").addEventListener("click", login)
   document.getElementById("register-button").addEventListener("click", signupPage)
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      userPage()
+    }
+  })
 }
 function userPage() {
   document.querySelector("section").remove()
