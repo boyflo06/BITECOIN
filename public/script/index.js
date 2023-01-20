@@ -463,7 +463,7 @@ function optionsPage() {
     <input id="name-input" placeholder="Nouveau Nom"><br>
     <p style="margin: 0; font-size: 14px; color:red;" id="name-error"></p>
     <p id="price" style="margin: 5px; font-size: 16px;"></p>
-    <button style="margin-top: 5px;">Changer</button>
+    <button style="margin-top: 5px;" id="change-name">Changer</button>
     <p>C'est tout, pour le moment</p>
   </section>`
   )
@@ -479,6 +479,7 @@ function optionsPage() {
         }
       })
       document.getElementById("back-button").addEventListener("click", userPage)
+      document.getElementById("change-name").addEventListener("click", changeName)
     } else {
       indexPage()
     }
