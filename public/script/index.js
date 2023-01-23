@@ -124,7 +124,17 @@ function loginPage() {
 
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      userPage()
+      var uid = user.uid
+      db = getDatabase()
+      get(child(ref(db), "users/" + uid + "/autorelog")).then((snapshot)=>{
+        if (snapshot.exists() == true) {
+          if (snapshot.val() == true) {
+            userPage()
+          }
+        } else {
+          userPage()
+        }
+      })
     }
   })
 }
@@ -156,7 +166,7 @@ function userPage() {
         if (snapshot.val().entreprise == false) {
           document.getElementById("name").innerHTML = "Hey " + snapshot.val().name
           document.getElementById("id").innerHTML = "ID : " + uid
-          document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+          document.getElementById("bank").innerHTML = Math.round(snapshot.val().bank) + " ß"
           var userrole = snapshot.val().role
           const revenue = document.getElementById("revenue")
           document.getElementById("role").innerHTML = "(role : " + userrole + ")"
@@ -255,7 +265,7 @@ function transferPage() {
       var uid = user.uid
       db = getDatabase()
       get(child(ref(db), "users/" + uid)).then((snapshot)=>{
-        document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+        document.getElementById("bank").innerHTML = Math.round(snapshot.val().bank) + " ß"
       })
       get(child(ref(db), "users/"))
         .then((snapshot)=>{
@@ -389,7 +399,7 @@ function facturePage() {
           )
           document.getElementById("newFacture-button").addEventListener("click", newFacturePage)
         }
-        document.getElementById("bank").innerHTML = snapshot.val().bank + " ß"
+        document.getElementById("bank").innerHTML = Math.round(snapshot.val().bank) + " ß"
         document.getElementById("back-button").addEventListener("click", userPage)
         factureList()
       })
@@ -464,6 +474,11 @@ function optionsPage() {
     <p style="margin: 0; font-size: 14px; color:red;" id="name-error"></p>
     <p id="price" style="margin: 5px; font-size: 16px;"></p>
     <button style="margin-top: 5px;" id="change-name">Changer</button>
+    <p style="margin-bottom: -5px;">Auto Relog</p>
+    <div style="display: flex; justify-content: center; align-items: center;">
+        <input type="checkbox" style="width: 1.5pc; margin: 0px;"  id="relog-checkbox">
+        <p style="font-weight: normal; font-size: 14px; margin : 0px;">Détermine si vous souhaitez vous reconnecter<br>a ce compte automatiquement</p>
+    </div>
     <p>C'est tout, pour le moment</p>
   </section>`
   )
@@ -478,8 +493,22 @@ function optionsPage() {
           document.getElementById("price").innerHTML = "Prix = Gratuit (Offre de premier changement)"
         }
       })
+      get(child(ref(db), "users/" + uid + "/autorelog")).then((snapshot)=>{
+        if (snapshot.exists() == true) {
+          if (snapshot.val() == true) {
+            document.getElementById("relog-checkbox").checked = true
+          } else {
+            document.getElementById("relog-checkbox").checked = false
+          }
+        } else {
+          document.getElementById("relog-checkbox").checked = true
+        }
+      })
       document.getElementById("back-button").addEventListener("click", userPage)
       document.getElementById("change-name").addEventListener("click", changeName)
+      document.getElementById("relog-checkbox").addEventListener("click", function() {
+        set(ref(db, "users/" + uid + "/autorelog"), document.getElementById("relog-checkbox").checked)
+      })
     } else {
       indexPage()
     }
