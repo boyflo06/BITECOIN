@@ -126,10 +126,134 @@ function loginPage() {
     if (user) {
       var uid = user.uid
       db = getDatabase()
-      get(child(ref(db), "users/" + uid + "/autorelog")).then((snapshot)=>{
+      get(child(ref(db), "users/" + uid + "/relogType")).then((snapshot)=>{
         if (snapshot.exists() == true) {
-          if (snapshot.val() == true) {
+          if (snapshot.val() == "auto") {
             userPage()
+          } else if (snapshot.val() == "pin") {
+            document.querySelector("section").remove()
+            document.querySelector("header").insertAdjacentHTML("afterend", 
+              `<section id="login">
+                <a id="logout">Log-Out</a>
+                <p id="instruction">Entrez votre pin</p>
+                <div style="display: flex; justify-content: center; align-items">
+                  <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring1">
+                  <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring2">
+                  <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring3">
+                  <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring4">
+                </div>
+                <div style="display: flex; justify-content: center; align-items: center;">
+                  <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 250px;">
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                      <p class="keypad" id="keypad-1">1</p>
+                      <p class="keypad" id="keypad-2">2</p>
+                      <p class="keypad" id="keypad-3">3</p>
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                      <p class="keypad" id="keypad-4">4</p>
+                      <p class="keypad" id="keypad-5">5</p>
+                      <p class="keypad" id="keypad-6">6</p>
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                      <p class="keypad" id="keypad-7">7</p>
+                      <p class="keypad" id="keypad-8">8</p>
+                      <p class="keypad" id="keypad-9">9</p>
+                    </div>
+                    <div style="display: flex; justify-content: center; align-items: center;">
+                      <p class="keypad" id="keypad-back">🠔</p>
+                      <p class="keypad" id="keypad-0">0</p>
+                      <p class="keypad" id="keypad-enter">🠖</p>
+                    </div>
+                  </div>
+                </div>
+                <p style="margin: 0; font-size: 14px; color:red;" id="pin-error"></p>
+              </section>`
+            )
+            var pin1 = ""
+            //keypad inputs
+            document.getElementById("keypad-1").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "1"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-2").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "2"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-3").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "3"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-4").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "4"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-5").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "5"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-6").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "6"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-7").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "7"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-8").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "8"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-9").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "9"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-0").addEventListener("click", function() {
+              if (pin1.length < 4) {
+                pin1 = pin1 + "0"
+                document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+              }
+            })
+            document.getElementById("keypad-enter").addEventListener("click", function() {
+              if (pin1.length == 4) {
+                get(child(ref(db), "users/" + uid + "/pin")).then((snapshot)=>{
+                  if (pin1 == snapshot.val()) {
+                    userPage()
+                  } else {
+                    document.getElementById("pin-error").innerHTML = "Pin incorecte!"
+                    document.getElementById("ring1").src = "./style/unchecked-ring.svg"
+                    document.getElementById("ring2").src = "./style/unchecked-ring.svg"
+                    document.getElementById("ring3").src = "./style/unchecked-ring.svg"
+                    document.getElementById("ring4").src = "./style/unchecked-ring.svg"
+                    pin1 = ""
+                  }
+                })
+              }
+            })
+            document.getElementById("keypad-back").addEventListener("click", function() {
+              if (pin1.length > 0) {
+                document.getElementById("ring" + pin1.length).src = "./style/unchecked-ring.svg"
+                pin1 = pin1.substring(0, pin1.length-1)
+              }
+            })
+            document.getElementById("logout").addEventListener("click", signout)
           }
         } else {
           userPage()
@@ -474,11 +598,24 @@ function optionsPage() {
     <p style="margin: 0; font-size: 14px; color:red;" id="name-error"></p>
     <p id="price" style="margin: 5px; font-size: 16px;"></p>
     <button style="margin-top: 5px;" id="change-name">Changer</button>
-    <p style="margin-bottom: -5px;">Auto Relog</p>
+    <p style="margin-bottom: -5px;">Type de Reconnection</p>
     <div style="display: flex; justify-content: center; align-items: center;">
-        <input type="checkbox" style="width: 1.5pc; margin: 0px;"  id="relog-checkbox">
-        <p style="font-weight: normal; font-size: 14px; margin : 0px;">Détermine si vous souhaitez vous reconnecter<br>a ce compte automatiquement</p>
+      <div style="display: flex; justify-content: center; align-items: start; flex-direction: column; width: 250px;">
+        <div style="display: flex; justify-content: center; align-items: center;" id="relog-enp">
+            <input type="checkbox" style="width: 1.5pc; margin: 0px; margin-right: 5px;" id="relog-enp-chck">
+            <p style="font-weight: normal; font-size: 14px; margin : 0px;">Email et mdp <span style="color: green;">(sécure)</span></p>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;" id="relog-pin">
+            <input type="checkbox" style="width: 1.5pc; margin: 0px; margin-right: 5px;" id="relog-pin-chck">
+            <p style="font-weight: normal; font-size: 14px; margin : 0px;">Code Pin <span style="color: orange;">(moyenement sécure)</span></p>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;" id="relog-auto">
+            <input type="checkbox" style="width: 1.5pc; margin: 0px; margin-right: 5px;" id="relog-auto-chck">
+            <p style="font-weight: normal; font-size: 14px; margin : 0px;">Auto Relog <span style="color: red;">(pas sécure)</span></p>
+        </div>
+      </div>
     </div>
+    <a id="createPin-button">Créer/Changer un/de code pin</a>
     <p>C'est tout, pour le moment</p>
   </section>`
   )
@@ -493,24 +630,230 @@ function optionsPage() {
           document.getElementById("price").innerHTML = "Prix = Gratuit (Offre de premier changement)"
         }
       })
-      get(child(ref(db), "users/" + uid + "/autorelog")).then((snapshot)=>{
+      get(child(ref(db), "users/" + uid + "/relogType")).then((snapshot)=>{
         if (snapshot.exists() == true) {
-          if (snapshot.val() == true) {
-            document.getElementById("relog-checkbox").checked = true
-          } else {
-            document.getElementById("relog-checkbox").checked = false
+          if (snapshot.val() == "auto") {
+            document.getElementById("relog-auto-chck").checked = true
+          } else if (snapshot.val() == "pin") {
+            document.getElementById("relog-pin-chck").checked = true
+          } else if (snapshot.val() == "enp") {
+            document.getElementById("relog-enp-chck").checked = true
           }
         } else {
-          document.getElementById("relog-checkbox").checked = true
+          document.getElementById("relog-auto-chck").checked = true
         }
       })
       document.getElementById("back-button").addEventListener("click", userPage)
       document.getElementById("change-name").addEventListener("click", changeName)
-      document.getElementById("relog-checkbox").addEventListener("click", function() {
-        set(ref(db, "users/" + uid + "/autorelog"), document.getElementById("relog-checkbox").checked)
+      document.getElementById("createPin-button").addEventListener("click", pinPage)
+      document.getElementById("relog-auto").addEventListener("click", function() {
+        set(ref(db, "users/" + uid + "/relogType"), "auto")
+        document.getElementById("relog-enp-chck").checked = false
+        document.getElementById("relog-pin-chck").checked = false
+        document.getElementById("relog-auto-chck").checked = true
+      })
+      get(child(ref(db), "users/" + uid + "/pin")).then((snapshot)=>{
+        if (snapshot.exists() == true) {
+          document.getElementById("relog-pin").addEventListener("click", function() {
+            set(ref(db, "users/" + uid + "/relogType"), "pin")
+            document.getElementById("relog-enp-chck").checked = false
+            document.getElementById("relog-pin-chck").checked = true
+            document.getElementById("relog-auto-chck").checked = false
+          })
+        } else {
+          document.getElementById("relog-pin-chck").disabled = true
+          document.getElementById("relog-pin").insertAdjacentHTML("afterend", 
+          `<p style="margin: -10px 0 0 0; font-size: 14px;">Vous devez d'abbord creer un code pin</p>`)
+        }
+      })
+      document.getElementById("relog-enp").addEventListener("click", function() {
+        set(ref(db, "users/" + uid + "/relogType"), "enp")
+        document.getElementById("relog-enp-chck").checked = true
+        document.getElementById("relog-pin-chck").checked = false
+        document.getElementById("relog-auto-chck").checked = false
       })
     } else {
       indexPage()
+    }
+  })
+}
+
+function pinPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend",
+  `<section id="login">
+    <a id="back-button">Retour</a>
+    <h1>Changer de Pin</h1>
+    <p id="instruction">Entrez le nouveau Pin</p>
+    <div style="display: flex; justify-content: center; align-items">
+      <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring1">
+      <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring2">
+      <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring3">
+      <img src="./style/unchecked-ring.svg" height="32px" style="margin-top: 0; margin-bottom: 0px;" id="ring4">
+    </div>
+    <div style="display: flex; justify-content: center; align-items: center;">
+      <div style="display: flex; justify-content: center; align-items: center; flex-direction: column; width: 250px;">
+        <div style="display: flex; justify-content: center; align-items: center;">
+          <p class="keypad" id="keypad-1">1</p>
+          <p class="keypad" id="keypad-2">2</p>
+          <p class="keypad" id="keypad-3">3</p>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+          <p class="keypad" id="keypad-4">4</p>
+          <p class="keypad" id="keypad-5">5</p>
+          <p class="keypad" id="keypad-6">6</p>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+          <p class="keypad" id="keypad-7">7</p>
+          <p class="keypad" id="keypad-8">8</p>
+          <p class="keypad" id="keypad-9">9</p>
+        </div>
+        <div style="display: flex; justify-content: center; align-items: center;">
+          <p class="keypad" id="keypad-back">🠔</p>
+          <p class="keypad" id="keypad-0">0</p>
+          <p class="keypad" id="keypad-enter">🠖</p>
+        </div>
+      </div>
+    </div>
+    <p style="margin: 0; font-size: 14px; color:red;" id="pin-error"></p>
+  </section>`
+  )
+  onAuthStateChanged(auth, (user)=>{
+    if (user) {
+      var uid = user.uid
+      db = getDatabase()
+      var pin1 = ""
+      var confirm = false
+      var pin2 = ""
+      //keypad inputs
+      document.getElementById("keypad-1").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "1"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "1"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-2").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "2"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "2"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-3").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "3"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "3"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-4").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "4"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "4"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-5").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "5"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "5"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-6").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "6"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "6"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-7").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "7"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "7"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-8").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "8"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "8"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-9").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "9"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "9"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-0").addEventListener("click", function() {
+        if (pin1.length < 4) {
+          pin1 = pin1 + "0"
+          document.getElementById("ring" + pin1.length).src = "./style/checked-ring.svg"
+        } else if (pin2.length < 4 && confirm) {
+          pin2 = pin2 + "0"
+          document.getElementById("ring" + pin2.length).src = "./style/checked-ring.svg"
+        }
+      })
+      document.getElementById("keypad-enter").addEventListener("click", function() {
+        if (pin1.length == 4 && confirm == false) {
+          document.getElementById("ring1").src = "./style/unchecked-ring.svg"
+          document.getElementById("ring2").src = "./style/unchecked-ring.svg"
+          document.getElementById("ring3").src = "./style/unchecked-ring.svg"
+          document.getElementById("ring4").src = "./style/unchecked-ring.svg"
+          confirm = true
+          document.getElementById("instruction").innerHTML = "Confirmez le nouveau Pin"
+          console.log("pin = " + pin1)
+        } else if (pin2.length == 4 && confirm == true) {
+          if (pin1 != pin2) {
+            document.getElementById("ring1").src = "./style/unchecked-ring.svg"
+            document.getElementById("ring2").src = "./style/unchecked-ring.svg"
+            document.getElementById("ring3").src = "./style/unchecked-ring.svg"
+            document.getElementById("ring4").src = "./style/unchecked-ring.svg"
+            confirm = false
+            pin1 = ""
+            pin2 = ""
+            document.getElementById("pin-error").innerHTML = "Les codes pin ne sont pas les mêmes!<br>Merci de recommencer"
+          } else {
+            set(ref(db, "users/" + uid + "/pin"), pin2)
+            .then((snapshot)=>{optionsPage()})
+          }
+        }
+      })
+      document.getElementById("keypad-back").addEventListener("click", function() {
+        if (confirm == false && pin1.length > 0) {
+          document.getElementById("ring" + pin1.length).src = "./style/unchecked-ring.svg"
+          pin1 = pin1.substring(0, pin1.length-1)
+        } else if (confirm == true && pin2.length > 0) {
+          document.getElementById("ring" + pin2.length).src = "./style/unchecked-ring.svg"
+          pin2 = pin2.substring(0, pin2.length-1)
+        }
+      })
+      //end
+      document.getElementById("back-button").addEventListener("click", optionsPage)
+    } else {
+      loginPage()
     }
   })
 }
