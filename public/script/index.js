@@ -26,7 +26,7 @@ const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
 
-const currentVersion = "1.0.4"
+const currentVersion = "1.0.5"
 
 get(child(ref(db), "appInfo")).then((snapshot)=>{
   if (snapshot.val().version == "maintenance") {
@@ -160,9 +160,9 @@ function loginPage() {
                       <p class="keypad" id="keypad-9">9</p>
                     </div>
                     <div style="display: flex; justify-content: center; align-items: center;">
-                      <p class="keypad" id="keypad-back">🠔</p>
+                      <p class="keypad" id="keypad-back"><img src="./style/arrowLeft.png" style="width: 25px;"></p>
                       <p class="keypad" id="keypad-0">0</p>
-                      <p class="keypad" id="keypad-enter">🠖</p>
+                      <p class="keypad" id="keypad-enter"><img src="./style/arrowRight.png" style="width: 25px;"></p>
                     </div>
                   </div>
                 </div>
@@ -709,9 +709,9 @@ function pinPage() {
           <p class="keypad" id="keypad-9">9</p>
         </div>
         <div style="display: flex; justify-content: center; align-items: center;">
-          <p class="keypad" id="keypad-back">🠔</p>
+          <p class="keypad" id="keypad-back"><img src="./style/arrowLeft.png" style="width: 25px;"></p>
           <p class="keypad" id="keypad-0">0</p>
-          <p class="keypad" id="keypad-enter">🠖</p>
+          <p class="keypad" id="keypad-enter"><img src="./style/arrowRight.png" style="width: 25px;"></p>
         </div>
       </div>
     </div>
@@ -835,6 +835,7 @@ function pinPage() {
             pin1 = ""
             pin2 = ""
             document.getElementById("pin-error").innerHTML = "Les codes pin ne sont pas les mêmes!<br>Merci de recommencer"
+            document.getElementById("instruction").innerHTML = "Entrez le nouveau Pin"
           } else {
             set(ref(db, "users/" + uid + "/pin"), pin2)
             .then((snapshot)=>{optionsPage()})
