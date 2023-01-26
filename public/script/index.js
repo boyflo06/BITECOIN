@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js"
+import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js"
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -447,7 +447,8 @@ function adminPage() {
       +'<h2 id="lendRequest-title">Demandes de prets</h2>'
       +'<div id="lendRequests" style="display: none;">'
       +'</div>'
-      +'<button id="weekly-update"><h2 style="margin: 0;">Mise a jour hebdomadaire</h2></button>'
+      +'<button id="proprety"><h2 style="margin: 0;">Propriétés</h2></button><br>'
+      +'<button id="weekly-update" style="margin-top: 20px;"><h2 style="margin: 0;">Mise a jour hebdomadaire</h2></button>'
     +'</section>'
   )
   onAuthStateChanged(auth, (user) => {
@@ -461,6 +462,7 @@ function adminPage() {
           adminlogs()
           showLendRequest()
           document.getElementById("weekly-update").addEventListener("click", update)
+          document.getElementById("proprety").addEventListener("click", propretyPage)
           document.getElementById("back-button").addEventListener("click", userPage)
         } else {
           userPage()
@@ -855,6 +857,109 @@ function pinPage() {
       document.getElementById("back-button").addEventListener("click", optionsPage)
     } else {
       loginPage()
+    }
+  })
+}
+
+function propretyPage() {
+  document.querySelector("section").remove()
+  document.querySelector("header").insertAdjacentHTML("afterend",
+  `<section id="login">
+    <a id="back-button">Retour</a>
+    <h1>Créer une Propriéte</h1>
+    <select id="id-select" style="margin: 15px; width: 16.5pc;">
+      <option value="none">-- Please Choose an Option --</option>
+      <optgroup label="particuliers" id="particuliers">
+      </optgroup>
+    </select>
+    <p style="margin: 0; font-size: 14px; color:red;" id="id-error"></p>
+    <input placeholder="Montant des taxs" id="amount-input" style="margin-bottom: 15px;">
+    <p style="margin: 0; font-size: 14px; color:red;" id="amount-error"></p>
+    <input placeholder="Notes (pas obligatoire)" id="note-input" style="margin-bottom: 15px;"><br>
+    <button id="create-button"><p style="margin: 0;">Créer</p></button>
+    <h2 id="see">Voir les propriétés</h2>
+    <div id="property-list">
+    </div>
+  </section>`
+  )
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      var db = getDatabase()
+      var uid = user.uid
+      get(child(ref(db), "users/" + uid)).then((snapshot)=>{
+        if (snapshot.val().admin == true) {
+          //create property part
+          get(child(ref(db), "users/"))
+          .then((snapshot)=>{
+            snapshot.forEach((dataSnapshot)=>{
+              if(dataSnapshot.val().entreprise == false) {
+                document.getElementById("particuliers").insertAdjacentHTML("beforeend", 
+                  "<option value='" + dataSnapshot.key + "' id='under-me'>" + dataSnapshot.val().name + " (id : " + dataSnapshot.key + ")" + "</option>"
+                )
+              }
+            })
+          })
+          document.getElementById("create-button").addEventListener("click", function() {
+            var db = getDatabase()
+            var uid = user.uid
+            var id = document.getElementById("id-select").value
+            var amount = document.getElementById("amount-input").value
+            var note = document.getElementById("note-input").value
+            //check em hoes
+            if (id == "none") {
+              document.getElementById("id-error").innerHTML = "Merci de choisir un utilisateur"
+              return
+            }
+            document.getElementById("id-error").innerHTML = ""
+            if (/^\d+$/.test(amount) == false) {
+              document.getElementById("amount-error").innerHTML = "Veuillez entrer un nombre (sans symbols)"
+              return
+            } else if (amount < 5) {
+              document.getElementById("amount-error").innerHTML = "Merci d'indiquer 5ß ou plus"
+              return
+            }
+            document.getElementById("amount-error").innerHTML = ""
+
+            //add them hoes
+            set(push(ref(db, "properties")), {
+              uid : id,
+              amount : Number(amount),
+              note : note
+            })
+            propretyPage()
+          })
+
+          //manage properties part
+          get(child(ref(db), "properties")).then((properties)=>{
+            properties.forEach((snapshot)=>{
+              get(child(ref(db), "users/" + snapshot.val().uid)).then((userData)=>{
+                if (snapshot.val().note == "") {
+                  var note = "(non fournie)"
+                } else {
+                  var note = snapshot.val().note
+                }
+                document.getElementById("property-list").insertAdjacentHTML("afterbegin",
+                `<div class="property-data">
+                  <p style="margin: 0;">Propriétaire : ` + userData.val().name + `</p>
+                  <p style="margin: 0;">Taxes : ` + snapshot.val().amount + `</p>
+                  <p style="margin-top: 0;">Note : ` + note + `</p>
+                  <button style="width: 6pc; display: flex; align-items: center; justify-content: center;" id="delete-` + snapshot.key + `"><p>Suprimer</p></button>
+                </div>`
+                )
+                document.getElementById("delete-" + snapshot.key).addEventListener("click", function() {
+                  set(ref(db, "properties/" + snapshot.key), null)
+                  propretyPage()
+                })
+              })
+            })
+          })
+        } else {
+          userPage()
+        }
+      })
+      document.getElementById("back-button").addEventListener("click", adminPage)
+    } else {
+      indexPage()
     }
   })
 }
@@ -1769,10 +1874,10 @@ async function update() {
   var user = auth.currentUser
   var uid = user.uid
   var i = 0
+  var tax = 0
   
   get(child(ref(db),"users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((fdoSnapshot)=>{
     var fdoBank = fdoSnapshot.val().bank
-    var tax = 0
     get(child(ref(db), "users")).then((snapshot)=>{
       snapshot.forEach((dataSnapshot)=>{
         if (dataSnapshot.val().verified == true && dataSnapshot.val().entreprise == false) {
@@ -1896,13 +2001,43 @@ async function update() {
         }
         i = i + 2
       })
+    get(child(ref(db), "properties")).then((properties)=>{
+      var ptax = 0
+      properties.forEach((property)=>{
+        get(child(ref(db), "users/" + property.val().uid)).then((userData)=>{
+          var bank = userData.val().bank
+          ptax = ptax + property.val().amount
+          set(ref(db, "users/" + property.val().uid + "/bank"), bank - property.val().amount)
+          set(ref(db, "transactions/" + (Date.now() + i + 400)), {
+            name : userData.val().name,
+            tname : "FDO",
+            uid : property.val().uid,
+            tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+            motif : "impot propriété",
+            amount : property.val().amount
+          })
+        })
+        i = i + 2
+      })
+      get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank")).then((fdoBankSnapshot)=>{
+        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBankSnapshot.val() + ptax)
+        set(ref(db, "transactions/" + (Date.now() + i + 500)), {
+          name : "utilisateurs",
+          tname : "FDO",
+          uid : "null",
+          tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+          motif : "impots toutes propriétés",
+          amount : ptax
+        })
+      })
+    })
       set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + tax)
-      set(ref(db, "transactions/" + (Date.now() + i + 400)), {
+      set(ref(db, "transactions/" + (Date.now() + i + 600)), {
         name : "utilisateurs",
         tname : "FDO",
         uid : "null",
         tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-        motif : "impot salaire",
+        motif : "impots salaire",
         amount : tax
       })
     })
