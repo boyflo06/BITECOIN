@@ -3,6 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
 import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js"
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
+import { initializeAppCheck, ReCaptchaV3Provider, getToken } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app-check.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -22,6 +23,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider('6LdNekAkAAAAAEWoR3aVfhSgEhPeD3hmKO7EqaFI'),
+  isTokenAutoRefreshEnabled: true
+});
+console.log( await getToken(appCheck, true))
 const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
@@ -273,11 +279,10 @@ function userPage() {
       +'<p id="revenue" style="margin-top: 0;"></p>'
       +'<div id="links">'
         +'<div style="margin-bottom: 5px;"><a id="transfer-button"><button><p style="margin: 0;">Transferer</p></button></a></div><br>'
-        +'<div style="margin-bottom: 0px"><a id="lend-button"><button disabled><p style="margin: 0;">Empreinter</p></button></a></div>'
-        +'<p style="margin-top: 0; font-size: 15px;">Cette fonctionalité est désactivée pour la sortie de l' + "'" + 'app</p>'
+        +'<div style="margin-bottom: 5px;"><a id="lend-button"><button><p style="margin: 0;">Empreinter</p></button></a></div><br>'
         +'<div style="margin-bottom: 5px;"><a id="factures-button"><button><p style="margin: 0;">Factures</p></button></a></div><br>'
-        +'<div style="margin-bottom: 5px"><a id="userlogs-button"><button><p style="margin: 0;">Historique</p></button></a></div><br>'
-        +'<div style="margin-bottom: 5px"><a id="options-button"><button><p style="margin: 0;">Options</p></button></a></div><br>'
+        +'<div style="margin-bottom: 5px;"><a id="userlogs-button"><button><p style="margin: 0;">Historique</p></button></a></div><br>'
+        +'<div style="margin-bottom: 5px;"><a id="options-button"><button><p style="margin: 0;">Options</p></button></a></div><br>'
       +'</div>'
       +'<a id="logout">Log-Out</a>'
     +'</section>'
@@ -326,7 +331,7 @@ function userPage() {
           
           document.getElementById("transfer-button").addEventListener("click", transferPage)
           document.getElementById("userlogs-button").addEventListener("click", userlogsPage)
-          //document.getElementById("lend-button").addEventListener("click", lendPage)
+          document.getElementById("lend-button").addEventListener("click", lendPage)
           document.getElementById("factures-button").addEventListener("click", facturePage)
           document.getElementById("options-button").addEventListener("click", optionsPage)
         } else {
@@ -491,12 +496,55 @@ function lendPage() {
       +'<p style="font-size: 14px;">Si vous ne savez pas repayer la banque, votre solde sera negatif</p>'
       +'<button style="margin-top: 20px;" id="lend-button"><p style="margin: 0px;">Envoyer</p></button><br>'
       +'<p style="color: green;" id="result"></p>'
+      +'<h2 id="active-lends">Liste d' + "'" + 'Empreints Actifs</h2>'
+      +'<div id="activeList" style="display: none;">'
+      +'</div>'
+      +'<h2 id="request-lends">Demandes d' + "'" + 'Empreints</h2>'
+      +'<div id="requestList" style="display: none;">'
+      +'</div>'
     +'</section>'
   )
   onAuthStateChanged(auth, (user) => {
     if (user) {
       var uid = user.uid
+      get(child(ref(db), "lendRequests")).then((snapshot)=>{
+        snapshot.forEach((lendRequest)=>{
+          if (lendRequest.val().tuid == uid) {
+            document.getElementById("requestList").insertAdjacentHTML("afterbegin", 
+              `<div class="transaction-data">
+                <h3 style="margin: 15px 0 0 0;">En attente</h3>
+                <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                  <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + lendRequest.val().amount + `ß</p>
+                </div>
+                <p style="margin-top: 0; margin-bottom: 0px;">Motif : ` + lendRequest.val().motif + `</p>
+                <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                  <p style="font-size: 16px; margin-top: 0; margin-bottom: 15px;">Durée : ` + lendRequest.val().nb_weeks + ` (payments : `+ lendRequest.val().payments + `ß)</p>
+                </div>
+              </div>`
+            )
+          }
+        })
+      })
+      get(child(ref(db), "users/" + uid + "/lend")).then((userData)=>{
+        console.log(userData.val())
+        userData.forEach((lend)=>{
+          document.getElementById("activeList").insertAdjacentHTML("afterbegin", 
+            `<div class="transaction-data">
+              <h3 style="margin: 15px 0 0 0;">Actif</h3>
+              <div style="display: flex; justify-content: center; margin: 0px 20px;">
+                <p style="margin-top: 0; margin-bottom: 0px;">Montant : ` + lend.val().amount + `ß</p>
+              </div>
+              <p style="margin-top: 0; margin-bottom: 0px;">Motif : ` + lend.val().motif + `</p>
+              <div style="display: flex; justify-content: center; margin: 0px 20px; align-items: center;">
+                <p style="font-size: 16px; margin-top: 0; margin-bottom: 15px;">Durée restante : ` + lend.val().weeks_left + ` (payments : `+ lend.val().payments + `ß)</p>
+              </div>
+            </div>`
+          )
+        })
+      })
       document.getElementById("lend-button").addEventListener("click", lend)
+      document.getElementById("active-lends").addEventListener("click", function() {toggledisplay("activeList")})
+      document.getElementById("request-lends").addEventListener("click", function() {toggledisplay("requestList")})
       document.getElementById("back-button").addEventListener("click", userPage)
     } else {
       indexPage()
@@ -1323,7 +1371,7 @@ async function lend() {
     nb_weeks : weeks,
     intrest : i
   })
-  document.getElementById("result").innerHTML = "Empreint demandé"
+  lendPage()
 }
 
 async function acceptLend(lendID) {
@@ -1331,15 +1379,16 @@ async function acceptLend(lendID) {
     var db = getDatabase()
     var user = auth.currentUser
     var uid = user.uid
-    var bank = await get(child(ref(db), "users/" + uid)).then((dataSnapshot)=>{
+    var bank = await get(child(ref(db), "users/" + snapshot.val().tuid)).then((dataSnapshot)=>{
       return dataSnapshot.val().bank
     })
 
-    set(ref(db, "users/" + uid + "/bank"), Number(bank) + snapshot.val().amount)
-    set(ref(db, "users/" + uid + "/lend/" + Date.now()), {
+    set(ref(db, "users/" + snapshot.val().tuid + "/bank"), Number(bank) + snapshot.val().amount)
+    set(ref(db, "users/" + snapshot.val().tuid + "/lend/" + Date.now()), {
       amount : snapshot.val().amount,
       payments : snapshot.val().payments,
       weeks_left : snapshot.val().nb_weeks,
+      motif : snapshot.val().motif,
       intrest : snapshot.val().intrest
     })
 
@@ -1982,13 +2031,9 @@ async function update() {
           })
           
           //impots sur la fortune
-          if (dataSnapshot.val().bank > 10000000) {
+          if (dataSnapshot.val().bank > 18000) {
             tax = tax + (dataSnapshot.val().bank)*0.05
             set(ref(db, "users/" + dataSnapshot.key + "/bank"), dataSnapshot.val().bank - (dataSnapshot.val().bank*0.05))
-            i = 0
-            while (i < 100) {
-              i = i+1
-            }
             set(ref(db, "transactions/" + (Date.now() + i + 300)), {
               name : name,
               tname : "FDO",
