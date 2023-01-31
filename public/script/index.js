@@ -32,7 +32,7 @@ const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
 
-const currentVersion = "1.0.6"
+const currentVersion = "1.1.0"
 
 get(child(ref(db), "appInfo")).then((snapshot)=>{
   if (snapshot.val().version == "maintenance") {
