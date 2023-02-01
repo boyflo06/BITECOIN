@@ -3,7 +3,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.14.0/firebas
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-analytics.js";
 import { getDatabase, ref, set, get, child, push } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-database.js"
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-auth.js"
-import { initializeAppCheck, ReCaptchaV3Provider, getToken } from "https://www.gstatic.com/firebasejs/9.14.0/firebase-app-check.js"
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -23,16 +22,11 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('6LdNekAkAAAAAEWoR3aVfhSgEhPeD3hmKO7EqaFI'),
-  isTokenAutoRefreshEnabled: true
-});
-console.log( await getToken(appCheck, true))
 const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
 
-const currentVersion = "1.1.0"
+const currentVersion = "1.1.1"
 
 get(child(ref(db), "appInfo")).then((snapshot)=>{
   if (snapshot.val().version == "maintenance") {
