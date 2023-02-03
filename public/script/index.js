@@ -28,7 +28,7 @@ var db = getDatabase();
 
 const currentVersion = "1.1.1"
 
-get(child(ref(db), "appInfo")).then((snapshot)=>{
+/*[[get(child(ref(db), "appInfo")).then((snapshot)=>{
   if (snapshot.val().version == "maintenance") {
     document.querySelector("header").insertAdjacentHTML("afterend",
       `<h1 style="color: orange;" id="alert">L'app est en cours de maintenance. Merci de revenir plus tard</h1>`
@@ -40,11 +40,11 @@ get(child(ref(db), "appInfo")).then((snapshot)=>{
       <h1 style="color: red;" id="alert">(Version actuelle : v` + snapshot.val().version + ` ; Version intallé : v` + currentVersion + `)</h1>`
     )
     document.querySelector("section").remove()
-  } else {
+  } else { */
     indexPage();
     document.getElementById("header-text").addEventListener("click", indexPage)
-  }
-})
+  /*}
+})*/
 
 function indexPage() {
   if (document.querySelector("section") != null) {
