@@ -26,7 +26,7 @@ const analytics = getAnalytics(app);
 var auth = getAuth();
 var db = getDatabase();
 
-const currentVersion = "1.1.1"
+const currentVersion = "1.1.2"
 
 /*[[get(child(ref(db), "appInfo")).then((snapshot)=>{
   if (snapshot.val().version == "maintenance") {
@@ -448,6 +448,7 @@ function adminPage() {
       +'</div>'
       +'<button id="proprety"><h2 style="margin: 0;">Propriétés</h2></button><br>'
       +'<button id="weekly-update" style="margin-top: 20px;"><h2 style="margin: 0;">Mise a jour hebdomadaire</h2></button>'
+      +'<p id="update-times"></p>'
     +'</section>'
   )
   onAuthStateChanged(auth, (user) => {
@@ -460,7 +461,29 @@ function adminPage() {
           document.getElementById("lendRequest-title").addEventListener("click", function() {toggledisplay("lendRequests")})
           adminlogs()
           showLendRequest()
-          document.getElementById("weekly-update").addEventListener("click", update)
+          get(child(ref(db), "appInfo/lastUpdate")).then((lastUpdate)=>{
+            //count number of mondays
+            var today = new Date()
+            var startDate = new Date(Number(lastUpdate.val()))
+            if (startDate.getDay() === 1) {
+              startDate.setDate(startDate.getDate() + 1);
+            }
+            let numMondays = 0;
+            while (startDate.getTime() <= today.getTime()) {
+              if (startDate.getDay() === 1) {
+                numMondays++;
+              }
+              startDate.setDate(startDate.getDate() + 1);
+            }
+            console.log(numMondays)
+            //show stuff and shit
+            if (numMondays > 0) {
+              document.getElementById("weekly-update").addEventListener("click", function() {update(numMondays)})
+              document.getElementById("update-times").innerHTML = "Va s'executer " + numMondays + " fois"
+            } else {
+              document.getElementById("weekly-update").disabled = true
+            }
+          })
           document.getElementById("proprety").addEventListener("click", propretyPage)
           document.getElementById("back-button").addEventListener("click", userPage)
         } else {
@@ -1222,10 +1245,12 @@ async function transfer() {
     return
   }
 
-  var fdoBank = await get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((snapshot)=>{ return snapshot.val().bank })
   //Transfer amount
   await set(ref(db, "users/" + uid + "/bank"), bank-amount)
   await set(ref(db, "users/" + id + "/bank"), Number(tbank)+(Number(amount)*0.85))
+
+  //get fdo bank amount and update
+  var fdoBank = await get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((snapshot)=>{ return snapshot.val().bank })
   await set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), Number(fdoBank)+(Number(amount)*0.15))
 
   //Log transfer to database
@@ -1781,7 +1806,9 @@ async function pay(facture) {
   //update benef bank
   await set(ref(db, "users/" + benefUid + "/bank"), Number(benefBank) + Number(fAmount)*0.8)
 
-  //
+  //update fdo bank
+  var fdoBank = await get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank")).then(async(fdoSnapshot)=>{ return fdoSnapshot.val()})
+  set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), Number(fdoBank) + Number(fAmount)*0.2)
 
   //log transaction
   var name = await get(child(ref(db), "users/" + uid)).then((snapshot)=>{
@@ -1911,176 +1938,180 @@ async function changeName() {
   userPage()
 }
 
-async function update() {
+async function update(x) {
   
   var db = getDatabase()
   var user = auth.currentUser
   var uid = user.uid
   var i = 0
   var tax = 0
-  
-  get(child(ref(db),"users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((fdoSnapshot)=>{
-    var fdoBank = fdoSnapshot.val().bank
-    get(child(ref(db), "users")).then((snapshot)=>{
-      snapshot.forEach((dataSnapshot)=>{
-        if (dataSnapshot.val().verified == true && dataSnapshot.val().entreprise == false) {
-          //salaires
-          var name = String(dataSnapshot.val().name)
-          var role = String(dataSnapshot.val().role)
-          var bank = Number(dataSnapshot.val().bank)
-          var dbref = ref(db, "users/" + dataSnapshot.key + "/bank")
+  for(let z = 0; z < x; z++) {
+    get(child(ref(db),"users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2")).then((fdoSnapshot)=>{
+      var fdoBank = fdoSnapshot.val().bank
+      get(child(ref(db), "users")).then((snapshot)=>{
+        snapshot.forEach((dataSnapshot)=>{
+          if (dataSnapshot.val().verified == true && dataSnapshot.val().entreprise == false) {
+            //salaires
+            var name = String(dataSnapshot.val().name)
+            var role = String(dataSnapshot.val().role)
+            var bank = Number(dataSnapshot.val().bank)
+            var dbref = ref(db, "users/" + dataSnapshot.key + "/bank")
 
-          if (role == "sans-emploie") {
-            set(dbref, bank + (800*0.80))
-            var salaire = 800*0.80
-            tax = tax + 800*0.20
-          } else if (role == "membre") {
-            set(dbref, bank + (1200*0.80))
-            var salaire = 1200*0.80
-            tax = tax + 1200*0.20
-          } else if (role == "avocat" || role == "gestionnaire de propriété") {
-            set(dbref, bank + (1500*0.80))
-            var salaire = 1500*0.80
-            tax = tax + 1500*0.20
-          } else if (role == "conseiller") {
-            set(dbref, bank + (2000*0.80))
-            var salaire = 2000*0.80
-            tax = tax + 2000*0.20
-          } else if (role == "ministre" || role == "magistrat" || role == "premier ministre") {
-            set(dbref, bank + (2500*0.80))
-            var salaire = 2500*0.80
-            tax = tax + 2500*0.20
-          } else if (role == "ministre des finances + horateur") {
-            set(dbref, bank + (3150*0.80))
-            var salaire = 3150*0.80
-            tax = tax + 3150*0.20
-          } else if (role == "administrateur delegay") {
-            set(dbref, bank + (3500*0.80))
-            var salaire = 3500*0.80
-            tax = tax + 3500*0.20
-          } else if (role == "administrateur supreme") {
-            set(dbref, bank + (4750*0.80))
-            var salaire = 4750*0.80
-            tax = tax + 4750*0.20
-          } else if (role == "avocat + conseiller") {
-            set(dbref, bank + (3500*0.80))
-            var salaire = 3500*0.80
-            tax = tax + 3500*0.20
-          }  else if (role == "avocat + premier ministre") {
-            set(dbref, bank + (4000*0.80))
-            var salaire = 4000*0.80
-            tax = tax + 4000*0.20
-          } else if (role == "administrateur supreme + magistrat") {
-            set(dbref, bank + (7250*0.80))
-            var salaire = 7250*0.80
-            tax = tax + 7250*0.20
-          }
-          console.log(fdoBank + tax, name)
-          
-          set(ref(db, "transactions/" + (Date.now() + i)), {
-            name : "FDO",
-            tname : name,
-            uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-            tuid : dataSnapshot.key,
-            motif : "salaire (ttc)",
-            amount : salaire
-          })
+            if (role == "sans-emploie") {
+              set(dbref, bank + (800*0.80))
+              var salaire = 800*0.80
+              tax = tax + 800*0.20
+            } else if (role == "membre") {
+              set(dbref, bank + (1200*0.80))
+              var salaire = 1200*0.80
+              tax = tax + 1200*0.20
+            } else if (role == "avocat" || role == "gestionnaire de propriété") {
+              set(dbref, bank + (1500*0.80))
+              var salaire = 1500*0.80
+              tax = tax + 1500*0.20
+            } else if (role == "conseiller") {
+              set(dbref, bank + (2000*0.80))
+              var salaire = 2000*0.80
+              tax = tax + 2000*0.20
+            } else if (role == "ministre" || role == "magistrat" || role == "premier ministre") {
+              set(dbref, bank + (2500*0.80))
+              var salaire = 2500*0.80
+              tax = tax + 2500*0.20
+            } else if (role == "ministre des finances + horateur") {
+              set(dbref, bank + (3150*0.80))
+              var salaire = 3150*0.80
+              tax = tax + 3150*0.20
+            } else if (role == "administrateur delegay") {
+              set(dbref, bank + (3500*0.80))
+              var salaire = 3500*0.80
+              tax = tax + 3500*0.20
+            } else if (role == "administrateur supreme") {
+              set(dbref, bank + (4750*0.80))
+              var salaire = 4750*0.80
+              tax = tax + 4750*0.20
+            } else if (role == "avocat + conseiller") {
+              set(dbref, bank + (3500*0.80))
+              var salaire = 3500*0.80
+              tax = tax + 3500*0.20
+            }  else if (role == "avocat + premier ministre") {
+              set(dbref, bank + (4000*0.80))
+              var salaire = 4000*0.80
+              tax = tax + 4000*0.20
+            } else if (role == "administrateur supreme + magistrat") {
+              set(dbref, bank + (7250*0.80))
+              var salaire = 7250*0.80
+              tax = tax + 7250*0.20
+            }
+            console.log(fdoBank + tax, name)
+            
+            set(ref(db, "transactions/" + (Date.now() + i*z)), {
+              name : "FDO",
+              tname : name,
+              uid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+              tuid : dataSnapshot.key,
+              motif : "salaire (ttc)",
+              amount : salaire
+            })
 
-          // prets
-          dataSnapshot.forEach((snapshotDataSnapshot)=>{
-            if (snapshotDataSnapshot.key == "lend") {
-              snapshotDataSnapshot.forEach((dataSnapshotDataSnapshot)=>{
-                var payment = Number(dataSnapshotDataSnapshot.val().payments)
-                var weeks_left = Number(dataSnapshotDataSnapshot.val().weeks_left) - 1
-                set(ref(db, "users/" + dataSnapshot.key + "/bank"), bank - payment)
-                tax = tax + payment*0.2
-                if (weeks_left == 0) {
-                  set(ref(db, "users/" + dataSnapshot.key + "/lend/" + dataSnapshotDataSnapshot.key), null)
-                } else {
-                  set(ref(db, "users/" + dataSnapshot.key + "/lend/" + dataSnapshotDataSnapshot.key + "/weeks_left"), weeks_left)
-                }
-                set(ref(db, "transactions/" + (Date.now() + i + 100)), {
-                  name : name,
-                  tname : "bank",
-                  uid : dataSnapshot.key,
-                  tuid : "bank",
-                  motif : "remboursement de pret",
-                  amount : payment,
-                })  
-                i = 0
-                while (i < 100) {
-                  i = i+1
+            // prets
+            dataSnapshot.forEach((snapshotDataSnapshot)=>{
+              if (snapshotDataSnapshot.key == "lend") {
+                snapshotDataSnapshot.forEach((dataSnapshotDataSnapshot)=>{
+                  var payment = Number(dataSnapshotDataSnapshot.val().payments)
+                  var weeks_left = Number(dataSnapshotDataSnapshot.val().weeks_left) - 1
+                  set(ref(db, "users/" + dataSnapshot.key + "/bank"), bank - payment)
+                  tax = tax + payment*0.2
+                  if (weeks_left == 0) {
+                    set(ref(db, "users/" + dataSnapshot.key + "/lend/" + dataSnapshotDataSnapshot.key), null)
+                  } else {
+                    set(ref(db, "users/" + dataSnapshot.key + "/lend/" + dataSnapshotDataSnapshot.key + "/weeks_left"), weeks_left)
+                  }
+                  set(ref(db, "transactions/" + (Date.now() + i*z + 100)), {
+                    name : name,
+                    tname : "bank",
+                    uid : dataSnapshot.key,
+                    tuid : "bank",
+                    motif : "remboursement de pret",
+                    amount : payment,
+                  })  
+                  i = 0
+                  while (i < 100) {
+                    i = i+1
 
-                }
-                set(ref(db, "transactions/" + (Date.now() + i + 200)), {
-                  name : "bank",
-                  tname : "FDO",
-                  uid : "bank",
-                  tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-                  motif : "impot entrprise (=> remboursement pret)",
-                  amount : payment*0.20
+                  }
+                  set(ref(db, "transactions/" + (Date.now() + i*z + 200)), {
+                    name : "bank",
+                    tname : "FDO",
+                    uid : "bank",
+                    tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                    motif : "impot entrprise (=> remboursement pret)",
+                    amount : payment*0.20
+                  })
                 })
+              }
+            })
+            
+            //impots sur la fortune
+            if (dataSnapshot.val().bank > 18000) {
+              tax = tax + (dataSnapshot.val().bank)*0.05
+              set(ref(db, "users/" + dataSnapshot.key + "/bank"), dataSnapshot.val().bank - (dataSnapshot.val().bank*0.05))
+              set(ref(db, "transactions/" + (Date.now() + i*z + 300)), {
+                name : name,
+                tname : "FDO",
+                uid : dataSnapshot.key,
+                tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+                motif : "impot sur le fortune",
+                amount : (dataSnapshot.val().bank*0.05)
               })
             }
-          })
-          
-          //impots sur la fortune
-          if (dataSnapshot.val().bank > 18000) {
-            tax = tax + (dataSnapshot.val().bank)*0.05
-            set(ref(db, "users/" + dataSnapshot.key + "/bank"), dataSnapshot.val().bank - (dataSnapshot.val().bank*0.05))
-            set(ref(db, "transactions/" + (Date.now() + i + 300)), {
-              name : name,
-              tname : "FDO",
-              uid : dataSnapshot.key,
-              tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-              motif : "impot sur le salaire",
-              amount : (dataSnapshot.val().bank*0.05)
-            })
           }
-        }
-        i = i + 2
-      })
-    get(child(ref(db), "properties")).then((properties)=>{
-      var ptax = 0
-      properties.forEach((property)=>{
-        get(child(ref(db), "users/" + property.val().uid)).then((userData)=>{
-          var bank = userData.val().bank
-          ptax = ptax + property.val().amount
-          set(ref(db, "users/" + property.val().uid + "/bank"), bank - property.val().amount)
-          set(ref(db, "transactions/" + (Date.now() + i + 400)), {
-            name : userData.val().name,
+          i = i + 2
+        })
+      get(child(ref(db), "properties")).then((properties)=>{
+        var ptax = 0
+        properties.forEach((property)=>{
+          get(child(ref(db), "users/" + property.val().uid)).then((userData)=>{
+            var bank = userData.val().bank
+            ptax = ptax + property.val().amount
+            set(ref(db, "users/" + property.val().uid + "/bank"), bank - property.val().amount)
+            set(ref(db, "transactions/" + (Date.now() + i*z + 400)), {
+              name : userData.val().name,
+              tname : "FDO",
+              uid : property.val().uid,
+              tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
+              motif : "impot propriété",
+              amount : property.val().amount
+            })
+          })
+          i = i + 2
+        })
+        get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank")).then((fdoBankSnapshot)=>{
+          set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBankSnapshot.val() + ptax)
+          set(ref(db, "transactions/" + (Date.now() + i*z + 500)), {
+            name : "utilisateurs",
             tname : "FDO",
-            uid : property.val().uid,
+            uid : "null",
             tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-            motif : "impot propriété",
-            amount : property.val().amount
+            motif : "impots toutes propriétés",
+            amount : ptax
           })
         })
-        i = i + 2
       })
-      get(child(ref(db), "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank")).then((fdoBankSnapshot)=>{
-        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBankSnapshot.val() + ptax)
-        set(ref(db, "transactions/" + (Date.now() + i + 500)), {
+        set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + tax)
+        set(ref(db, "transactions/" + (Date.now() + i*z + 600)), {
           name : "utilisateurs",
           tname : "FDO",
           uid : "null",
           tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-          motif : "impots toutes propriétés",
-          amount : ptax
+          motif : "impots salaire",
+          amount : tax
         })
       })
     })
-      set(ref(db, "users/tO6sKQbxCaOsy3wvEQnJDkJrhgA2/bank"), fdoBank + tax)
-      set(ref(db, "transactions/" + (Date.now() + i + 600)), {
-        name : "utilisateurs",
-        tname : "FDO",
-        uid : "null",
-        tuid : "tO6sKQbxCaOsy3wvEQnJDkJrhgA2",
-        motif : "impots salaire",
-        amount : tax
-      })
-    })
-  })
+    await setTimeout(() => {}, 500);
+  }
+  await set(ref(db, "appInfo/lastUpdate"), Date.now())
+  userPage()
 }
 
 //Validation functions
